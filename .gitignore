@@ -1,0 +1,13 @@
+# Ignorar archivos y directorios temporales de compilación
+**/obj/
+
+# Ignorar archivos binarios y ejecutables
+**/*.exe
+**/*.dll
+**/*.so
+game
+
+# Ignorar archivos estáticos de bibliotecas (.a)
+**/*.a
+
+./vscode
