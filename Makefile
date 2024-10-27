@@ -83,19 +83,21 @@ endef
 #### CONFIG
 ##########################################
 
-APP		:= game
-C_FLAGS	:= -Wall -pedantic -std=c++17
-CC_FLAGS:= $(C_FLAGS)
-CC		:= g++
-C		:= gcc
-MKDIR	:= mkdir -p
-SRC		:= src
-OBJ		:= obj
+APP			:= game
+C_FLAGS		:= -Wall -pedantic -std=c++17
+CC_FLAGS	:= $(C_FLAGS)
+CC			:= g++
+C			:= gcc
+MKDIR		:= mkdir -p
+SRC			:= src
+OBJ			:= obj
 LIBS_DIR	:= libs
-LIBS 	:= $(LIBS_DIR)/picoPNG/libpicopng.a  $(LIBS_DIR)/tinyPTC/libtinyptc.a -lX11 -lXext 
-INC_DIRS := -I$(SRC) -I$(LIBS_DIR)
-RM 		:= rm
+LIBS 		:= -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt 
+INC_DIRS 	:= -I$(SRC) -I$(LIBS_DIR)
+RM 			:= rm
 
+#Usa lasiguiente expresión para compilar con DEBUG y poder hacer depuración
+#make DEBUG=1
 ifdef DEBUG
 	CC_FLAGS += -g
 else

@@ -1,0 +1,43 @@
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",  // Nombre de la configuración
+            "type": "cppdbg",         // Usa el depurador de C++
+            "request": "launch",
+            "program": "${workspaceFolder}/game",  // Ruta al ejecutable que compilas con Makefile
+            "args": [],               // Argumentos que pasas al programa (si es necesario)
+            "stopAtEntry": false,     // Cambia a true si quieres que el programa se detenga en main()
+            "cwd": "${workspaceFolder}",  // Directorio de trabajo (normalmente el proyecto raíz)
+            "environment": [],
+            "externalConsole": true,  // Si prefieres ver la salida en la terminal integrada de VSCode
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Habilitar impresión de caracteres",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            //"preLaunchTask": "${workspaceFolder}/make",  // Ejecutar la tarea de compilación con Makefile antes de hacer debug
+            "miDebuggerPath": "/usr/bin/gdb",  // Ruta al depurador GDB
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "/usr/bin/gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
+            "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "C:/mingw/bin/gdb.exe"
+            }
+        }
+    ]
+}
