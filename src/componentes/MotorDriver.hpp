@@ -1,17 +1,12 @@
 #pragma once
+
 #include <wiringPi.h>
 
-#include <cmath>
 #include <iostream>
 
 #include "Fisicas.hpp"
 
-/// @brief
-struct MotorPasos : public Fisicas {
-  // https://github.com/LaurensHuizer/Arduino/blob/master/libraries/StepperMotor/StepperMotor.h
-
-  const int pinA, pinB, pinC, pinD;  // Definicion de pines
-
+struct MotorDriver : Fisicas {
   /*Número de pasos por una vuelta*/
   const int npasos = 0;
   /*Paso en el que se encuentra actualmente*/
@@ -22,6 +17,8 @@ struct MotorPasos : public Fisicas {
   int pasoActual = 0;
   /*Indica si el motor se encuentra ejecutando una instrucción de rotación*/
   bool estaRotando = false;
+
+  Fisicas fisica;
 
   /*Sentido en el que gira el motor. 0 parado, 1 sentido horario, -1 sentido
    * antihorario*/
@@ -34,16 +31,34 @@ struct MotorPasos : public Fisicas {
   /*Tiempo entre paso y paso medido en milisegundos*/
   int tiempoPaso = 1;
 
-  Fisicas fisica;
+  explicit MotorDriver() : Fisicas() {}
 
-  int _mode = 0;
-  int _steps = -1;
-  int _delayMs = 1;
-  int _engineStep = 0;
-  int _currentStep = 0;
-  int _rotationDirection = 0;
+  /**
+   * @brief Actualiza el número de paso en función del sentido de giro del
+   * motor.
+   *
+   * Este método incrementa o decrementa la variable `secuenciaPaso` según el
+   * sentido de giro especificado. Si el sentido es horario, avanza al siguiente
+   * paso y reinicia en 1 cuando se excede el máximo (4). Si el sentido es
+   * antihorario, retrocede al paso anterior y reinicia en 4 cuando es menor
+   * a 1.
+   */
+  virtual void siguientePaso() = 0;
 
-  MotorPasos(int pinA, int pinB, int pinC, int pinD);
+  /**
+   * @brief Libera la tensión de todos los pines y deja
+   * el motor en punto muerto.
+   */
+  virtual void parar() = 0;
+
+  /**
+   * @brief
+   *
+   * @param cantidadPasos numero de pasos a dar
+   */
+  virtual void rotarPasos(int cantidadPasos) = 0;
+
+  virtual void rotar() = 0;
 
   /**
    * @brief Aplica tensión al pin correspondiente según el paso actual del
@@ -59,34 +74,7 @@ struct MotorPasos : public Fisicas {
    * - Paso 3: Activa `pinC`
    * - Paso 4: Activa `pinA`
    */
-  void energizarBobinaActual();
-
-  /**
-   * @brief Actualiza el número de paso en función del sentido de giro del
-   * motor.
-   *
-   * Este método incrementa o decrementa la variable `secuenciaPaso` según el
-   * sentido de giro especificado. Si el sentido es horario, avanza al siguiente
-   * paso y reinicia en 1 cuando se excede el máximo (4). Si el sentido es
-   * antihorario, retrocede al paso anterior y reinicia en 4 cuando es menor
-   * a 1.
-   */
-  void siguientePaso();
-
-  /**
-   * @brief Libera la tensión de todos los pines y deja
-   * el motor en punto muerto.
-   */
-  void parar();
-
-  /**
-   * @brief
-   *
-   * @param cantidadPasos numero de pasos a dar
-   */
-  void rotarPasos(int cantidadPasos);
-
-  void rotar();
+  virtual void energizarBobinaActual() = 0;
 
   /**
    * @brief Establece el sentido de giro del motor basado en el número de pasos.
@@ -103,17 +91,19 @@ struct MotorPasos : public Fisicas {
    *              - Un valor negativo indica sentido antihorario.
    *              - Un valor cero indica que el motor debe estar parado.
    */
-  void estableceSentidoGiro(int pasos);
+  virtual void estableceSentidoGiro(int pasos) = 0;
 
-/**
- * @brief Verifica si se han completado todos los pasos de la instrucción.
- * 
- * Este método compara el número actual de pasos (`pasoActual`) con el número total 
- * de pasos requeridos (`pasosTotal`). Devuelve `true` si se han completado todos 
- * los pasos, o `false` en caso contrario.
- * 
- * @return `true` si el número de pasos actuales es mayor o igual al total de pasos,
- *         `false` en caso contrario.
- */
-  bool haCompletadoPasos();
+  /**
+   * @brief Verifica si se han completado todos los pasos de la instrucción.
+   *
+   * Este método compara el número actual de pasos (`pasoActual`) con el número
+   * total de pasos requeridos (`pasosTotal`). Devuelve `true` si se han
+   * completado todos los pasos, o `false` en caso contrario.
+   *
+   * @return `true` si el número de pasos actuales es mayor o igual al total de
+   * pasos, `false` en caso contrario.
+   */
+  virtual bool haCompletadoPasos() = 0;
+
+  virtual ~MotorDriver() = default;
 };

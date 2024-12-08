@@ -11,7 +11,7 @@
             "stopAtEntry": false,     // Cambia a true si quieres que el programa se detenga en main()
             "cwd": "${workspaceFolder}",  // Directorio de trabajo (normalmente el proyecto raíz)
             "environment": [],
-            "externalConsole": true,  // Si prefieres ver la salida en la terminal integrada de VSCode
+            "externalConsole": false,  // False Si prefieres ver la salida en la terminal integrada de VSCode
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -21,22 +21,12 @@
                 }
             ],
             //"preLaunchTask": "${workspaceFolder}/make",  // Ejecutar la tarea de compilación con Makefile antes de hacer debug
+            //"miDebuggerPath": "/usr/bin/gdb",  // Ruta al depurador GDB
             "miDebuggerPath": "/usr/bin/gdb",  // Ruta al depurador GDB
             "logging": {
                 "trace": true,
                 "traceResponse": true,
                 "engineLogging": true
-            },
-            "linux": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "/usr/bin/gdb"
-            },
-            "osx": {
-                "MIMode": "lldb"
-            },
-            "windows": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "C:/mingw/bin/gdb.exe"
             }
         }
     ]

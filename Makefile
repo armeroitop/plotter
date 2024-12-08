@@ -95,6 +95,7 @@ LIBS_DIR	:= libs
 LIBS 		:= -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt 
 INC_DIRS 	:= -I$(SRC) -I$(LIBS_DIR)
 RM 			:= rm
+DEBUG		:= 1
 
 #Usa lasiguiente expresión para compilar con DEBUG y poder hacer depuración
 #make DEBUG=1
