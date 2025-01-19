@@ -12,23 +12,20 @@ DRV8825Driver::DRV8825Driver(int step_pin, int dir_pin, int enable_pin)
   pinMode(dir_pin, OUTPUT);
   pinMode(enable_pin, OUTPUT);
   digitalWrite(enable_pin, LOW);
+  ponTiempoDePaso(100);
+  secuenciaPaso = 1;
 }
 
 void DRV8825Driver::siguientePaso() {
   // La secuencia de paso sera de 1 a 2, o en alto o en bajo
-  if (secuenciaPaso + 1 > 2) {
-    secuenciaPaso = 1;
-  } else {
-    ++secuenciaPaso;
-  }
+  secuenciaPaso = (secuenciaPaso == 1) ? 2 : 1;
   pasoActual++;
 }
 
 void DRV8825Driver::rotarPasos(int cantidadPasos) {
   // Si el motor está en funcionamiento, no iniciar una nueva tarea
   if (estaRotando) {
-    std::cout << "El motor está ocupado completando la tarea anterior."
-              << std::endl;
+    printf("Rotar ocupado \n");
     return;
   }
 
@@ -46,8 +43,9 @@ void DRV8825Driver::rotar() {
   if (haPasadoTiempoDePaso() && !haCompletadoPasos()) {
     ponTiempoDeInicio();
     siguientePaso();
+    energizarBobinaActual();
 
-    printf("En rotar mi paso es%d \n", pasoActual);
+    printf("En rotar mi paso es %d \n", pasoActual);
     printf("En rotar tiempodeInicio es %lld  y tiempo es %lld\n",
            tiempoDeInicio, obtenerTiempoActualMs());
   }
