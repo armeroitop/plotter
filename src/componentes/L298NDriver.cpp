@@ -37,9 +37,7 @@ void L298NDriver::rotarPasos(int cantidadPasos) {
   }
 
   // Iniciar una nueva tarea
-  sentidoGiro = (std::copysign(1, cantidadPasos) > 0)
-                    ? SentidoGiro::Horario
-                    : SentidoGiro::Antihorario;
+  estableceSentidoGiro(cantidadPasos);
   pasosTotal = abs(cantidadPasos);
   pasoActual = 0;
   estaRotando = true;

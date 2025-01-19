@@ -12,7 +12,7 @@
 
 // MotorPasos m1(1, 4, 5, 6);
 // L298NDriver driverL(config::MP1_Pin1, config::MP1_Pin2, config::MP1_Pin3,config::MP1_Pin4);
-DRV8825Driver driverL(config::step_pin, config::dir_pin);
+DRV8825Driver driverL(config::step_pin, config::dir_pin, config::enable_pin);
 
 MotorDriver& m1 = driverL;
 
