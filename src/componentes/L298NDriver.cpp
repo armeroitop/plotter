@@ -2,7 +2,7 @@
 #include "L298NDriver.hpp"
 
 L298NDriver::L298NDriver(int pinA, int pinB, int pinC, int pinD)
-    : pinA{pinA}, pinB{pinB}, pinC{pinC}, pinD{pinD}, MotorDriver() {
+    : MotorDriver(), pinA{pinA}, pinB{pinB}, pinC{pinC},  pinD{pinD}  {
   wiringPiSetup();
   pinMode(pinA, OUTPUT);
   pinMode(pinB, OUTPUT);

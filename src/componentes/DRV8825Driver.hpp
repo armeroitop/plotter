@@ -3,9 +3,10 @@
 #include "MotorDriver.hpp"
 
 struct DRV8825Driver : MotorDriver {
-  const int pinA, pinB, pinC, pinD;  // Definicion de pines
 
-  DRV8825Driver(int pinA, int pinB, int pinC, int pinD);
+  const int step_pin, dir_pin;  // Definicion de pines
+
+  DRV8825Driver(int step_pin, int dir_pin);
 
   void siguientePaso() override;
 

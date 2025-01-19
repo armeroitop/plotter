@@ -13,5 +13,11 @@ constexpr int MP1_Pin4 = 6;
 //**Final de carrera ****************
 
 
+//**Motor de pasos 1 - Driver DRV8825 ****************
+constexpr int step_pin = 1;
+constexpr int dir_pin  = 4;
+
+
+
 
 }  // namespace config
