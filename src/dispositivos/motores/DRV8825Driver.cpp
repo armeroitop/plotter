@@ -32,7 +32,7 @@ void DRV8825Driver::rotarPasos(int cantidadPasos) {
   // Iniciar una nueva tarea
   printf("inicio de rotar\n");
   estableceSentidoGiro(cantidadPasos);
-  pasosTotal = abs(cantidadPasos);
+  pasosTotal = 2 * abs(cantidadPasos);
   pasoActual = 0;
   estaRotando = true;
 }

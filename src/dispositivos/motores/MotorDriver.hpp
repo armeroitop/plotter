@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "Fisicas.hpp"
+#include "../../utilidades/Fisicas.hpp"
 
 struct MotorDriver : Fisicas {
   /*Número de pasos por una vuelta*/

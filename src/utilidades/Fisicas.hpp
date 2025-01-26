@@ -6,6 +6,21 @@ struct Fisicas {
   int64_t tiempoDeInicio;
   int64_t tiempoFinalizacion;
 
+  // Resolución de pasos del motor (pasos por unidad de medida, e.g., mm)
+
+  static inline constexpr float diametroPolea = 12.25f;  // en mm
+
+  static inline constexpr float resolucionAngular = 1.8f;  // grados por paso
+
+  /* Pasos por milímetro (pasos/mm) */
+  inline static constexpr float resolucionPaso =
+      360 / (diametroPolea * resolucionAngular * 3.14159);
+
+
+  /* Milimetros recorridos por paso (mm/paso)*/
+  inline static constexpr float distanciaPaso =
+      (diametroPolea * resolucionAngular * 3.14159) / 360;
+
   Fisicas();
   void ponTiempoDePaso(int ms);
 

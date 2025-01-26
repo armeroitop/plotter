@@ -1,60 +1,41 @@
 #include <stdio.h>
 #include <wiringPi.h>
 
-#include "componentes/DRV8825Driver.hpp"
-#include "componentes/L298NDriver.hpp"
-#include "componentes/MotorDriver.hpp"
+#include "control/PlanificadorDeMovimiento.hpp"
+#include "dispositivos/motores/DRV8825Driver.hpp"
+#include "dispositivos/motores/L298NDriver.hpp"
+#include "dispositivos/motores/MotorDriver.hpp"
 #include "include/config.hpp"
-
-// LED Pin - wiringPi pin 0 is BCM_GPIO 17.
-
-#define LED 16
-
-// MotorPasos m1(1, 4, 5, 6);
-// L298NDriver driverL(config::MP1_Pin1, config::MP1_Pin2,
-// config::MP1_Pin3,config::MP1_Pin4);
-DRV8825Driver driverL(config::step_pin, config::dir_pin, config::enable_pin);
-
-MotorDriver& m1 = driverL;
 
 int main(void) {
   printf("Raspberry Pi blink\n");
-
   wiringPiSetup();
 
-  m1.rotarPasos(400);
-  m1.ponTiempoDePaso(5);
+  DRV8825Driver driverL(config::MP1_step_pin, config::MP1_dir_pin,
+                        config::MP1_enable_pin);
 
-  while (m1.estaRotando) {
-    m1.rotar();
-    // printf("Paso actual %d \n", m1.pasoActual);
-  }
+  DRV8825Driver driverR(config::MP2_step_pin, config::MP2_dir_pin,
+                        config::MP2_enable_pin);
 
-  m1.rotarPasos(-400);
- 
+  // MotorDriver& m1 = driverL;
+  // MotorDriver& m2 = driverR;
 
-  while (m1.estaRotando) {
-    m1.rotar();
-    // printf("Paso actual %d \n", m1.pasoActual);
-  }
+  PlanificadorDeMovimiento planificador;
+  planificador.setMotores(driverL, driverR);
 
-  m1.rotarPasos(400);
-  
+  planificador.moverA(
+      10, 10);  // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
 
-  while (m1.estaRotando) {
-    m1.rotar();
-    // printf("Paso actual %d \n", m1.pasoActual);
-  }
-  m1.rotarPasos(-400);
-  
-
-  while (m1.estaRotando) {
-    m1.rotar();
-    // printf("Paso actual %d \n", m1.pasoActual);
-  }
-
-  m1.parar();
-
+  // m1.rotarPasos(200);
+  // m1.ponTiempoDePaso(5);
+  //
+  // while (m1.estaRotando) {
+  //   m1.rotar();
+  //   // printf("Paso actual %d \n", m1.pasoActual);
+  // }
+  //
+  // m1.parar();
+  //
   printf("Fin del programa\n");
   return 0;
 }

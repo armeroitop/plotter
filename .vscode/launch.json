@@ -2,6 +2,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+      
         {
             "name": "(gdb) Launch",  // Nombre de la configuración
             "type": "cppdbg",         // Usa el depurador de C++

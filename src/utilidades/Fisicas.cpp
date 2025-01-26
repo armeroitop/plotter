@@ -12,6 +12,7 @@ void Fisicas::ponTiempoDeInicio() {
 
 int64_t Fisicas::obtenerTiempoActualMs() {
   auto tiempoAhora = std::chrono::steady_clock::now();
+  //TODO cambiar std::chrono::milliseconds por std::chrono::microseconds
   auto tiempoMs = std::chrono::duration_cast<std::chrono::milliseconds>(
                       tiempoAhora.time_since_epoch())
                       .count();
@@ -23,3 +24,6 @@ bool Fisicas::haPasadoTiempoDePaso() {
 
   return (obtenerTiempoActualMs() > (tiempoDeInicio + tiempoDePaso));
 }
+
+
+
