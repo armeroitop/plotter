@@ -7,6 +7,8 @@
 #include "../../utilidades/Fisicas.hpp"
 
 struct MotorDriver : Fisicas {
+  /*Nombre del motor*/
+  std::string nombre= "";
   /*Número de pasos por una vuelta*/
   const int npasos = 0;
   /*Paso en el que se encuentra actualmente*/
@@ -18,8 +20,6 @@ struct MotorDriver : Fisicas {
   /*Indica si el motor se encuentra ejecutando una instrucción de rotación*/
   bool estaRotando = false;
 
-  Fisicas fisica;
-
   /*Sentido en el que gira el motor. 0 parado, 1 sentido horario, -1 sentido
    * antihorario*/
   enum class SentidoGiro {
@@ -28,7 +28,7 @@ struct MotorDriver : Fisicas {
     Antihorario = -1
   } sentidoGiro;
 
-  /*Tiempo entre paso y paso medido en milisegundos*/
+  /*Tiempo entre paso y paso medido en microsegundos*/
   int tiempoPaso = 1;
 
   explicit MotorDriver() : Fisicas() {}
@@ -104,6 +104,8 @@ struct MotorDriver : Fisicas {
    * pasos, `false` en caso contrario.
    */
   virtual bool haCompletadoPasos() = 0;
+
+  
 
   virtual ~MotorDriver() = default;
 };

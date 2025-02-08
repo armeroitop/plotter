@@ -8,34 +8,23 @@
 #include "include/config.hpp"
 
 int main(void) {
-  printf("Raspberry Pi blink\n");
-  wiringPiSetup();
+    printf("Inicio del programa\n");
+    wiringPiSetup();
 
-  DRV8825Driver driverL(config::MP1_step_pin, config::MP1_dir_pin,
-                        config::MP1_enable_pin);
+    DRV8825Driver motorIz(config::MP1_step_pin, config::MP1_dir_pin,
+                          config::MP1_enable_pin);
 
-  DRV8825Driver driverR(config::MP2_step_pin, config::MP2_dir_pin,
-                        config::MP2_enable_pin);
+    DRV8825Driver motorDr(config::MP2_step_pin, config::MP2_dir_pin,
+                          config::MP2_enable_pin);
 
-  // MotorDriver& m1 = driverL;
-  // MotorDriver& m2 = driverR;
+    motorIz.nombre = "motorIz";
+    motorDr.nombre = "motorDr";
 
-  PlanificadorDeMovimiento planificador;
-  planificador.setMotores(driverL, driverR);
+    PlanificadorDeMovimiento planificador;
+    planificador.setMotores(motorIz, motorDr);
 
-  planificador.moverA(
-      10, 10);  // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
+    planificador.moverA(9, 10); // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
 
-  // m1.rotarPasos(200);
-  // m1.ponTiempoDePaso(5);
-  //
-  // while (m1.estaRotando) {
-  //   m1.rotar();
-  //   // printf("Paso actual %d \n", m1.pasoActual);
-  // }
-  //
-  // m1.parar();
-  //
-  printf("Fin del programa\n");
-  return 0;
+    printf("Fin del programa\n");
+    return 0;
 }

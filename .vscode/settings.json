@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "*.js": "javascript",
-        "numbers": "cpp"
-    },
-    "C_Cpp.formatting": "clangFormat",
-    "editor.dropIntoEditor.preferences": [],
-    "editor.tabSize": 4
-}

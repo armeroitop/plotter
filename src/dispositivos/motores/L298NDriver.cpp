@@ -44,7 +44,7 @@ void L298NDriver::rotarPasos(int cantidadPasos) {
 }
 
 void L298NDriver::rotar() {
-  // si ha pasado el tiempo necesario entre casa paso y si no ha completado ya
+  // si ha pasado el tiempo necesario entre cada paso y si no ha completado ya
   // todos los pasos, podrá dar el siguiente paso
   if (haPasadoTiempoDePaso() && !haCompletadoPasos()) {
     ponTiempoDeInicio();
