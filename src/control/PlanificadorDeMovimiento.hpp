@@ -10,7 +10,8 @@ struct PlanificadorDeMovimiento {
     float velocidadX = 0;
     float velocidadY = 0;
 
-    float velocidadAngularMax = 0.0002f; // pasos/milisegundos
+    /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
+    float velocidadAngularMax = 0.0001f; // pasos/microisegundos
 
     explicit PlanificadorDeMovimiento();
 
@@ -28,8 +29,9 @@ struct PlanificadorDeMovimiento {
     void moverMotorX(int pasos, bool direccion); // Avanza pasos en X.
     void moverMotorY(int pasos, bool direccion); // Avanza pasos en Y.
 
-    void calcularPasos(float deltaX, float deltaY, int& pasosMotorX,
-                       int& pasosMotorY);
+    void calcularPasos(float deltaX, float deltaY,
+                        int& pasosMotorX,
+                        int& pasosMotorY);
 
     void detener();  // Detiene todos los motores.
     void pausar();   // Pausa el movimiento actual.

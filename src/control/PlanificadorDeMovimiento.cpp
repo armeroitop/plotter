@@ -21,25 +21,31 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
 
     // TODO calcular los tiempos de paso para cada motor en función de la
     // velocidad maxima
-    int tiempoPasoX = 200;
-    int tiempoPasoY = 200;
+    int tiempoPasoX = 10000;
+    int tiempoPasoY = 10000;
+
+    int absPasosMotorX = abs(pasosMotorX);
+    int absPasosMotorY = abs(pasosMotorY);
 
     // TODO meter esto en una funcion
-    if (pasosMotorX != 0 && pasosMotorY != 0) {
-        float relacionXY = static_cast<float>(pasosMotorX) / pasosMotorY;
+    if (absPasosMotorX != 0 && absPasosMotorY != 0) {
+        float relacionXY = static_cast<float>(absPasosMotorX) / absPasosMotorY;
 
-        if (relacionXY >= 1) {
+        if (relacionXY <= 1) {
+            tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
+            tiempoPasoX = tiempoPasoX * relacionXY;
+        } else {
             tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
             tiempoPasoY = tiempoPasoX * relacionXY;
-        } else {
-            tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-            tiempoPasoX = tiempoPasoY * relacionXY;
         }
-    } else if (pasosMotorX == 0) {
+    } else if (absPasosMotorX == 0) {
         tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-    } else if (pasosMotorY == 0) {
+    } else if (absPasosMotorY == 0) {
         tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
     }
+
+    printf("tiempoPasoX %i \n",tiempoPasoX);
+    printf("tiempoPasoY %i \n",tiempoPasoY);
 
     // TODO mover los motores hasta llegar a la posicion. Meter un while
     // verificando si hay movimiento en curso

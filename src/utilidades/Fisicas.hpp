@@ -27,7 +27,7 @@ struct Fisicas {
   /**
    * @brief Establece el tiempo de inicio al tiempo actual.
    *
-   * Este método obtiene el tiempo actual en milisegundos llamando al método
+   * Obtiene el tiempo actual en microsegundos llamando al método
    * `obtenerTiempoActualMs()` y lo asigna a la variable miembro
    * `tiempoDeInicio`.
    *
@@ -43,7 +43,7 @@ struct Fisicas {
    * @brief Verifica si ha transcurrido el intervalo de tiempo de paso desde el
    * inicio.
    *
-   * Este método compara el tiempo actual en milisegundos con el tiempo de
+   * Compara el tiempo actual en microsegundos con el tiempo de
    * inicio más el intervalo especificado para el paso. Si el tiempo actual es
    * mayor, significa que el intervalo de paso ha transcurrido y devuelve
    * `true`. En caso contrario, devuelve `false`.

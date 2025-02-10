@@ -7,16 +7,25 @@
 #include "../../utilidades/Fisicas.hpp"
 
 struct MotorDriver : Fisicas {
+
   /*Nombre del motor*/
   std::string nombre= "";
+
   /*Número de pasos por una vuelta*/
   const int npasos = 0;
-  /*Paso en el que se encuentra actualmente*/
+
+  /*Secuencia dentro de un paso en el que se encuentra actualmente*/
   int secuenciaPaso = 0;
+
+  /*Número de pasos secuenciales a dar por instrucción*/
+  int totalPasosSecuenciales = 0;
+  
   /*Número de pasos a dar por instrucción*/
-  int pasosTotal = 0;
-  /*Número de paso que está dando en la instrucción*/
+  int totalPasos = 0;
+
+  /*Número de paso secuencial que está dando en la instrucción. No es el numero de paso*/
   int pasoActual = 0;
+
   /*Indica si el motor se encuentra ejecutando una instrucción de rotación*/
   bool estaRotando = false;
 
@@ -43,7 +52,7 @@ struct MotorDriver : Fisicas {
    * antihorario, retrocede al paso anterior y reinicia en 4 cuando es menor
    * a 1.
    */
-  virtual void siguientePaso() = 0;
+  virtual void siguienteSecuencia() = 0;
 
   /**
    * @brief Libera la tensión de todos los pines y deja
@@ -60,20 +69,7 @@ struct MotorDriver : Fisicas {
 
   virtual void rotar() = 0;
 
-  /**
-   * @brief Aplica tensión al pin correspondiente según el paso actual del
-   * motor.
-   *
-   * Este método activa el pin adecuado en función del valor de `secuenciaPaso`,
-   * estableciendo el pin en alto (HIGH) para energizar la bobina
-   * correspondiente al paso. Cada paso sigue una secuencia que permite el giro
-   * controlado del motor.
-   *
-   * - Paso 1: Activa `pinD`
-   * - Paso 2: Activa `pinB`
-   * - Paso 3: Activa `pinC`
-   * - Paso 4: Activa `pinA`
-   */
+  
   virtual void energizarBobinaActual() = 0;
 
   /**
@@ -97,7 +93,7 @@ struct MotorDriver : Fisicas {
    * @brief Verifica si se han completado todos los pasos de la instrucción.
    *
    * Este método compara el número actual de pasos (`pasoActual`) con el número
-   * total de pasos requeridos (`pasosTotal`). Devuelve `true` si se han
+   * total de pasos requeridos (`totalPasosSecuenciales`). Devuelve `true` si se han
    * completado todos los pasos, o `false` en caso contrario.
    *
    * @return `true` si el número de pasos actuales es mayor o igual al total de
