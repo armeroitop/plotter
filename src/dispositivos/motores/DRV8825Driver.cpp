@@ -31,6 +31,7 @@ void DRV8825Driver::rotarPasos(int cantidadPasos) {
     pasoActual = 0;
     estaRotando = true;
     printf("inicio de rotar de %s con %i pasos\n", nombre.c_str(), cantidadPasos);
+    arrancar();
 }
 
 void DRV8825Driver::rotar() {
@@ -72,11 +73,12 @@ void DRV8825Driver::estableceSentidoGiro(int pasos) {
     if (pasos < 0) {
         sentidoGiro = SentidoGiro::Antihorario;
         digitalWrite(dir_pin, LOW);
-    }
-    else {
+    } else {
         sentidoGiro = SentidoGiro::Horario;
         digitalWrite(dir_pin, HIGH);
     }
 }
 
 void DRV8825Driver::parar() { digitalWrite(enable_pin, HIGH); }
+
+void DRV8825Driver::arrancar() { digitalWrite(enable_pin, LOW); }

@@ -33,6 +33,10 @@ struct PlanificadorDeMovimiento {
                         int& pasosMotorX,
                         int& pasosMotorY);
 
+    void calcularTiemposDePaso(float deltaX, float deltaY,
+        int& tiempoPasoX,
+        int& tiempoPasoY);
+
     void detener();  // Detiene todos los motores.
     void pausar();   // Pausa el movimiento actual.
     void reanudar(); // Reanuda después de una pausa.

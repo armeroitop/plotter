@@ -27,25 +27,10 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     int absPasosMotorX = abs(pasosMotorX);
     int absPasosMotorY = abs(pasosMotorY);
 
-    // TODO meter esto en una funcion
-    if (absPasosMotorX != 0 && absPasosMotorY != 0) {
-        float relacionXY = static_cast<float>(absPasosMotorX) / absPasosMotorY;
+    calcularTiemposDePaso(absPasosMotorX, absPasosMotorY, tiempoPasoX, tiempoPasoY);
 
-        if (relacionXY <= 1) {
-            tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-            tiempoPasoX = tiempoPasoX * relacionXY;
-        } else {
-            tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
-            tiempoPasoY = tiempoPasoX * relacionXY;
-        }
-    } else if (absPasosMotorX == 0) {
-        tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-    } else if (absPasosMotorY == 0) {
-        tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
-    }
-
-    printf("tiempoPasoX %i \n",tiempoPasoX);
-    printf("tiempoPasoY %i \n",tiempoPasoY);
+    printf("tiempoPasoX %i \n", tiempoPasoX);
+    printf("tiempoPasoY %i \n", tiempoPasoY);
 
     // TODO mover los motores hasta llegar a la posicion. Meter un while
     // verificando si hay movimiento en curso
@@ -70,6 +55,27 @@ void PlanificadorDeMovimiento::calcularPasos(float deltaX, float deltaY,
 
     pasosMotorX = static_cast<int>(Fisicas::resolucionPaso * (deltaX + deltaY));
     pasosMotorY = static_cast<int>(Fisicas::resolucionPaso * (deltaY - deltaX));
+}
+
+void PlanificadorDeMovimiento::calcularTiemposDePaso(float absPasosMotorX, float absPasosMotorY,
+                                                     int& tiempoPasoX,
+                                                     int& tiempoPasoY) {
+
+    if (absPasosMotorX != 0 && absPasosMotorY != 0) {
+        float relacionXY = static_cast<float>(absPasosMotorX) / absPasosMotorY;
+
+        if (relacionXY <= 1) {
+            tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
+            tiempoPasoX = static_cast<int>(tiempoPasoY / relacionXY);
+        } else {
+            tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
+            tiempoPasoY = static_cast<int>(tiempoPasoX * relacionXY);
+        }
+    } else if (absPasosMotorX == 0) {
+        tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
+    } else if (absPasosMotorY == 0) {
+        tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
+    }
 }
 
 void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) { }

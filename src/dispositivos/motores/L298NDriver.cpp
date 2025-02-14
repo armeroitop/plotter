@@ -15,17 +15,14 @@ void L298NDriver::siguienteSecuencia() {
         // Aumentar paso en sentido horario
         if (secuenciaPaso + 1 > 4) {
             secuenciaPaso = 1;
-        }
-        else {
+        } else {
             ++secuenciaPaso;
         }
-    }
-    else if (sentidoGiro == SentidoGiro::Antihorario) {
+    } else if (sentidoGiro == SentidoGiro::Antihorario) {
         // Disminuir paso en sentido antihorario:
         if (secuenciaPaso - 1 < 1) {
             secuenciaPaso = 4;
-        }
-        else {
+        } else {
             --secuenciaPaso;
         }
     }
@@ -80,11 +77,9 @@ void L298NDriver::estableceSentidoGiro(int pasos) {
 
     if (signo < 0) {
         sentidoGiro = SentidoGiro::Antihorario;
-    }
-    else if (signo > 0) {
+    } else if (signo > 0) {
         sentidoGiro = SentidoGiro::Horario;
-    }
-    else {
+    } else {
         sentidoGiro = SentidoGiro::Parado;
     }
 }

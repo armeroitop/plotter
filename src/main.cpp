@@ -1,23 +1,33 @@
 #include <stdio.h>
 #include <wiringPi.h>
+#include <fstream>
+#include <string>
 
 #include "control/PlanificadorDeMovimiento.hpp"
 #include "dispositivos/motores/DRV8825Driver.hpp"
 #include "dispositivos/motores/L298NDriver.hpp"
 #include "dispositivos/motores/MotorDriver.hpp"
 #include "include/config.hpp"
+#include "parseador/Gcode.hpp"
 
 int main(int argc, char *argv[]) {
     printf("Inicio del programa\n");
     wiringPiSetup();
 
-    if (argc != 3) {
+    /*if (argc != 3) {
         printf("Uso: %s <param1> <param2>\n", argv[0]);
         return 1;
     }
 
     int param1 = atoi(argv[1]);
     int param2 = atoi(argv[2]);
+    */
+    
+    std::ifstream archivoGcode(argv[1]);
+    if (!archivoGcode.is_open()) {
+        printf("No se pudo abrir el archivo: %s\n", argv[1]);
+        return 1;
+    }
 
     DRV8825Driver motorX(config::MP1_step_pin, config::MP1_dir_pin,
                           config::MP1_enable_pin);
@@ -31,8 +41,17 @@ int main(int argc, char *argv[]) {
     PlanificadorDeMovimiento planificador;
     planificador.setMotores(motorX, motorY);
 
-    planificador.moverA(param1, param2); // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
+    //planificador.moverA(param1, param2); // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
     //planificador.moverA(-9, 10); // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
+    
+    Gcode gcode(planificador);
+    std::string linea;
+    while (std::getline(archivoGcode, linea)) {
+        gcode.interpretar(linea);
+        delay(1000);
+    }
+
+    archivoGcode.close();
 
     printf("Fin del programa\n");
     return 0;

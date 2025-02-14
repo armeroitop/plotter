@@ -14,6 +14,8 @@ struct DRV8825Driver : MotorDriver {
 
   void parar() override;
 
+  void arrancar() override;
+
   void rotar() override;
 
   bool haCompletadoPasos() override;

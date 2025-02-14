@@ -60,6 +60,8 @@ struct MotorDriver : Fisicas {
    */
   virtual void parar() = 0;
 
+  virtual void arrancar() = 0;
+
   /**
    * @brief
    *
