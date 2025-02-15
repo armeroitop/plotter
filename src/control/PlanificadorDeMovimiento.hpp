@@ -1,9 +1,16 @@
 #pragma once
 #include "../dispositivos/motores/DRV8825Driver.hpp"
+#include "../dispositivos/interruptores/FinalDeCarrera.hpp"
 
 struct PlanificadorDeMovimiento {
-    MotorDriver* p_motorX;
-    MotorDriver* p_motorY;
+    MotorDriver* p_motorX = nullptr;
+    MotorDriver* p_motorY = nullptr;
+
+    FinalDeCarrera* p_finXmin = nullptr;
+    FinalDeCarrera* p_finXmax = nullptr;
+    FinalDeCarrera* p_finYmin = nullptr;
+    FinalDeCarrera* p_finYmax = nullptr;
+    
     int x_actual = 0, y_actual = 0;
 
     float velocidadUnitariaMax = 0;
@@ -16,6 +23,9 @@ struct PlanificadorDeMovimiento {
     explicit PlanificadorDeMovimiento();
 
     void setMotores(MotorDriver& motorX, MotorDriver& motorY);
+
+    void setFinalesDeCarrera(FinalDeCarrera& finXmin, FinalDeCarrera& finXmax,
+                             FinalDeCarrera& finYmin, FinalDeCarrera& finYmax);
 
     void setVelocidadMaxima(float velocidad);
     void setAceleracionMaxima(float aceleracion);
@@ -33,16 +43,23 @@ struct PlanificadorDeMovimiento {
                         int& pasosMotorX,
                         int& pasosMotorY);
 
-    void calcularTiemposDePaso(float deltaX, float deltaY,
+    void calcularTiemposDePaso(const float deltaX, const float deltaY,
         int& tiempoPasoX,
         int& tiempoPasoY);
 
+
+    void rotar();    // Realiza un paso en la trayectoria.
     void detener();  // Detiene todos los motores.
     void pausar();   // Pausa el movimiento actual.
-    void reanudar(); // Reanuda después de una pausa.
+    void arrancar(); // Reanuda después de una pausa.
 
     bool movimientoEnCurso(); // Devuelve si hay un movimiento en proceso.
+    bool alcanzaFinalDeCarrera();    // Devuelve si se ha alcanzado un final de carrera.
     void obtenerPosicion(float& x, float& y); // Retorna la posición actual.
+    void actualizarPosicion(float x, float y); // Actualiza la posición actual.
+
+    void configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY);
+     
 
     // Permite suavizar el arranque y la detención utilizando aceleración y
     // deceleración.

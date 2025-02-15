@@ -8,11 +8,10 @@ DRV8825Driver::DRV8825Driver(int step_pin, int dir_pin, int enable_pin)
     dir_pin { dir_pin },
     enable_pin { enable_pin } {
 
-    wiringPiSetup();
     pinMode(step_pin, OUTPUT);
     pinMode(dir_pin, OUTPUT);
     pinMode(enable_pin, OUTPUT);
-    digitalWrite(enable_pin, LOW);
+
     ponTiempoDePaso(100000);  // son 100ms - cada ms son 1000us
     secuenciaPaso = 2;
 }
@@ -54,7 +53,9 @@ void DRV8825Driver::rotar() {
     }
 }
 
-bool DRV8825Driver::haCompletadoPasos() { return (pasoActual >= totalPasos); }
+bool DRV8825Driver::haCompletadoPasos() {
+    return (pasoActual >= totalPasos);
+}
 
 void DRV8825Driver::siguienteSecuencia() {
     // La secuencia de paso sera de 1 a 2, o en alto o en bajo

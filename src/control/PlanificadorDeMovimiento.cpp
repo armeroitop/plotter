@@ -8,56 +8,60 @@ void PlanificadorDeMovimiento::setMotores(MotorDriver& motorX,
     p_motorY = &motorY;
 }
 
-void PlanificadorDeMovimiento::moverA(float x, float y) {
-    // TODO ver que posicion xy tenemos
+void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
+                                                    FinalDeCarrera& finXmax,
+                                                    FinalDeCarrera& finYmin,
+                                                    FinalDeCarrera& finYmax) {
 
-    // TODO calcular los pasos necesarios de cada motor para llegar a la posicion
-    // deseada
-    float deltaX = x - x_actual;
-    float deltaY = y - y_actual;
+    p_finXmin = &finXmin;
+    p_finXmax = &finXmax;
+    p_finYmin = &finYmin;
+    p_finYmax = &finYmax;
+}
+
+void PlanificadorDeMovimiento::moverA(float x, float y) {
+    // Calcular los pasos necesarios de cada motor para llegar a la posicion deseada
     int pasosMotorX = 0;
     int pasosMotorY = 0;
-    calcularPasos(deltaX, deltaY, pasosMotorX, pasosMotorY);
+    calcularPasos(x, y, pasosMotorX, pasosMotorY);
 
-    // TODO calcular los tiempos de paso para cada motor en función de la
-    // velocidad maxima
+    // Calcular los tiempos de paso para cada motor en función de la velocidad maxima
     int tiempoPasoX = 10000;
     int tiempoPasoY = 10000;
-
-    int absPasosMotorX = abs(pasosMotorX);
-    int absPasosMotorY = abs(pasosMotorY);
-
-    calcularTiemposDePaso(absPasosMotorX, absPasosMotorY, tiempoPasoX, tiempoPasoY);
+    calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
     printf("tiempoPasoX %i \n", tiempoPasoX);
     printf("tiempoPasoY %i \n", tiempoPasoY);
 
-    // TODO mover los motores hasta llegar a la posicion. Meter un while
-    // verificando si hay movimiento en curso
-    p_motorX->rotarPasos(pasosMotorX);
-    p_motorY->rotarPasos(pasosMotorY);
-    p_motorX->ponTiempoDePaso(tiempoPasoX);
-    p_motorY->ponTiempoDePaso(tiempoPasoY);
+    // Configurar los motores con los pasos y tiempos calculados
+    configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
 
-    while (p_motorX->estaRotando or p_motorY->estaRotando) {
-        p_motorX->rotar();
-        p_motorY->rotar();
-        // printf("Paso actual %d \n",p_motorX->pasoActual);
+
+    // Mover los motores hasta llegar a la posicion. 
+    arrancar();
+
+    while (movimientoEnCurso() && !alcanzaFinalDeCarrera()) {
+        rotar();
     }
-    p_motorX->parar();
-    p_motorY->parar();
+
+    detener();
+
+    actualizarPosicion(x, y);
 }
 
-void PlanificadorDeMovimiento::calcularPasos(float deltaX, float deltaY,
+void PlanificadorDeMovimiento::calcularPasos(float x, float y,
                                              int& pasosMotorX,
                                              int& pasosMotorY) {
     // Usamos la geometría H-Bot para calcular los pasos necesarios.
+    float deltaX = x - x_actual;
+    float deltaY = y - y_actual;
 
     pasosMotorX = static_cast<int>(Fisicas::resolucionPaso * (deltaX + deltaY));
     pasosMotorY = static_cast<int>(Fisicas::resolucionPaso * (deltaY - deltaX));
 }
 
-void PlanificadorDeMovimiento::calcularTiemposDePaso(float absPasosMotorX, float absPasosMotorY,
+void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
+                                                     const float absPasosMotorY,
                                                      int& tiempoPasoX,
                                                      int& tiempoPasoY) {
 
@@ -78,4 +82,43 @@ void PlanificadorDeMovimiento::calcularTiemposDePaso(float absPasosMotorX, float
     }
 }
 
+void PlanificadorDeMovimiento::rotar() {
+    p_motorX->rotar();
+    p_motorY->rotar();
+}
+
+void PlanificadorDeMovimiento::detener() {
+    p_motorX->parar();
+    p_motorY->parar();
+}
+
+void PlanificadorDeMovimiento::arrancar() {
+    p_motorX->arrancar();
+    p_motorY->arrancar();
+}
+
+bool PlanificadorDeMovimiento::movimientoEnCurso() {
+    return (p_motorX->estaRotando || p_motorY->estaRotando);
+}
+
+bool PlanificadorDeMovimiento::alcanzaFinalDeCarrera() {
+    return (p_finXmin->activado()
+            || p_finXmax->activado()
+            || p_finYmin->activado()
+            || p_finYmax->activado()
+        );
+}
+
 void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) { }
+
+void PlanificadorDeMovimiento::actualizarPosicion(float x, float y) {
+    x_actual = x;
+    y_actual = y;
+}
+
+void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY) {
+    p_motorX->rotarPasos(pasosMotorX);
+    p_motorY->rotarPasos(pasosMotorY);
+    p_motorX->ponTiempoDePaso(tiempoPasoX);
+    p_motorY->ponTiempoDePaso(tiempoPasoY);
+}

@@ -14,15 +14,6 @@ int main(int argc, char *argv[]) {
     printf("Inicio del programa\n");
     wiringPiSetup();
 
-    /*if (argc != 3) {
-        printf("Uso: %s <param1> <param2>\n", argv[0]);
-        return 1;
-    }
-
-    int param1 = atoi(argv[1]);
-    int param2 = atoi(argv[2]);
-    */
-    
     std::ifstream archivoGcode(argv[1]);
     if (!archivoGcode.is_open()) {
         printf("No se pudo abrir el archivo: %s\n", argv[1]);
@@ -40,6 +31,12 @@ int main(int argc, char *argv[]) {
 
     PlanificadorDeMovimiento planificador;
     planificador.setMotores(motorX, motorY);
+
+    FinalDeCarrera finXmin(config::pin_finXmin);
+    FinalDeCarrera finXmax(config::pin_finXmax);
+    FinalDeCarrera finYmin(config::pin_finYmin);
+    FinalDeCarrera finYmax(config::pin_finYmax);
+    planificador.setFinalesDeCarrera(finXmin, finXmax, finYmin, finYmax);
 
     //planificador.moverA(param1, param2); // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
     //planificador.moverA(-9, 10); // vamos a suponer que salimos desde 0 y tenemos que llegar a 10
