@@ -20,6 +20,10 @@ void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
 }
 
 void PlanificadorDeMovimiento::moverA(float x, float y) {
+    if (paradaEmergencia) {
+        return;
+    }
+
     // Calcular los pasos necesarios de cada motor para llegar a la posicion deseada
     int pasosMotorX = 0;
     int pasosMotorY = 0;
@@ -71,13 +75,16 @@ void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
         if (relacionXY <= 1) {
             tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
             tiempoPasoX = static_cast<int>(tiempoPasoY / relacionXY);
-        } else {
+        }
+        else {
             tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
             tiempoPasoY = static_cast<int>(tiempoPasoX * relacionXY);
         }
-    } else if (absPasosMotorX == 0) {
+    }
+    else if (absPasosMotorX == 0) {
         tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-    } else if (absPasosMotorY == 0) {
+    }
+    else if (absPasosMotorY == 0) {
         tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
     }
 }
@@ -102,11 +109,15 @@ bool PlanificadorDeMovimiento::movimientoEnCurso() {
 }
 
 bool PlanificadorDeMovimiento::alcanzaFinalDeCarrera() {
-    return (p_finXmin->activado()
-            || p_finXmax->activado()
-            || p_finYmin->activado()
-            || p_finYmax->activado()
-        );
+    if (p_finXmin->esPulsado()
+            || p_finXmax->esPulsado()
+            || p_finYmin->esPulsado()
+            || p_finYmax->esPulsado()) {
+        activarParadaDeEmergencia();
+        return true;
+    }
+
+    return false;
 }
 
 void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) { }
@@ -121,4 +132,17 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
     p_motorY->rotarPasos(pasosMotorY);
     p_motorX->ponTiempoDePaso(tiempoPasoX);
     p_motorY->ponTiempoDePaso(tiempoPasoY);
+}
+
+void PlanificadorDeMovimiento::activarParadaDeEmergencia() {
+    paradaEmergencia = true;
+    detener(); // Detener todos los motores inmediatamente
+}
+
+void PlanificadorDeMovimiento::desactivarParadaDeEmergencia() {
+    paradaEmergencia = false;
+}
+
+bool PlanificadorDeMovimiento::esParadaDeEmergencia() const {
+    return paradaEmergencia;
 }

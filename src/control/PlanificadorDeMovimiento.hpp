@@ -20,6 +20,8 @@ struct PlanificadorDeMovimiento {
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
     float velocidadAngularMax = 0.0001f; // pasos/microisegundos
 
+    bool paradaEmergencia;
+
     explicit PlanificadorDeMovimiento();
 
     void setMotores(MotorDriver& motorX, MotorDriver& motorY);
@@ -70,4 +72,11 @@ struct PlanificadorDeMovimiento {
 
     // Detecta los límites mecánicos y los configura.
     void calibrar();
+
+    void activarParadaDeEmergencia();
+    void desactivarParadaDeEmergencia();
+    bool esParadaDeEmergencia() const; // Método para verificar el estado de la parada de emergencia
+
+
+
 };
