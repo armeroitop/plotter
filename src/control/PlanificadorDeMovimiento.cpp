@@ -1,4 +1,5 @@
 #include "PlanificadorDeMovimiento.hpp"
+#include <cmath>
 
 PlanificadorDeMovimiento::PlanificadorDeMovimiento() { }
 
@@ -60,8 +61,8 @@ void PlanificadorDeMovimiento::calcularPasos(float x, float y,
     float deltaX = x - x_actual;
     float deltaY = y - y_actual;
 
-    pasosMotorX = static_cast<int>(Fisicas::resolucionPaso * (deltaX + deltaY));
-    pasosMotorY = static_cast<int>(Fisicas::resolucionPaso * (deltaY - deltaX));
+    pasosMotorX = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX - deltaY)));
+    pasosMotorY = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX + deltaY)));
 }
 
 void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
@@ -75,16 +76,13 @@ void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
         if (relacionXY <= 1) {
             tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
             tiempoPasoX = static_cast<int>(tiempoPasoY / relacionXY);
-        }
-        else {
+        } else {
             tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
             tiempoPasoY = static_cast<int>(tiempoPasoX * relacionXY);
         }
-    }
-    else if (absPasosMotorX == 0) {
+    } else if (absPasosMotorX == 0) {
         tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-    }
-    else if (absPasosMotorY == 0) {
+    } else if (absPasosMotorY == 0) {
         tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
     }
 }
