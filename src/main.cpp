@@ -9,11 +9,42 @@
 #include "dispositivos/motores/MotorDriver.hpp"
 #include "include/config.hpp"
 #include "parseador/Gcode.hpp"
+#include "dispositivos/servo/ServoBoli.hpp"
 
 int main(int argc, char* argv []) {
     printf("Inicio del programa\n");
     wiringPiSetup();
 
+
+
+    ServoBoli servoBoli(config::pin_servoBoli);
+    servoBoli.levantar();   
+    delay(2000);    
+    servoBoli.bajar();
+    delay(2000);
+    servoBoli.moverServo(3);
+    delay(2000);
+    servoBoli.moverServo(23);
+    delay(2000);
+    servoBoli.moverServo(3);
+    delay(2000);
+    servoBoli.moverServo(23);
+    delay(2000);
+
+    servoBoli.levantar();   
+    delay(2000);    
+    servoBoli.bajar();
+    delay(2000);
+    servoBoli.levantar();   
+    delay(2000);    
+    servoBoli.bajar();
+    delay(2000);
+
+  
+    //servoBoli.bajar();
+    //delay(2000);
+
+/*
     std::ifstream archivoGcode(argv[1]);
     if (!archivoGcode.is_open()) {
         printf("No se pudo abrir el archivo: %s\n", argv[1]);
@@ -61,6 +92,7 @@ int main(int argc, char* argv []) {
     }
 
     archivoGcode.close();
+    */
 
     printf("Fin del programa\n");
     return 0;

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iostream>
 
-Gcode::Gcode(PlanificadorDeMovimiento& planificador) : planificador(planificador) {}
+Gcode::Gcode(PlanificadorDeMovimiento& planificador) : planificador(planificador) { }
 
 void Gcode::interpretar(const std::string& instruccion) {
     std::istringstream entrada(instruccion);

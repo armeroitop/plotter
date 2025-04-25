@@ -24,6 +24,8 @@ constexpr int MP2_step_pin      = 1;
 constexpr int MP2_dir_pin       = 4;
 constexpr int MP2_enable_pin    = 5;
 
+//** Servo para la punta del boli */
+constexpr int pin_servoBoli     = 25;
 
 
 }  // namespace config
