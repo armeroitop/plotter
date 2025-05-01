@@ -130,6 +130,7 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
     p_motorY->rotarPasos(pasosMotorY);
     p_motorX->ponTiempoDePaso(tiempoPasoX);
     p_motorY->ponTiempoDePaso(tiempoPasoY);
+    
 }
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {
