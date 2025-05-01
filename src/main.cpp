@@ -15,48 +15,22 @@ int main(int argc, char* argv []) {
     printf("Inicio del programa\n");
     wiringPiSetup();
 
-
-
-    ServoBoli servoBoli(config::pin_servoBoli);
-    servoBoli.levantar();   
-    delay(2000);    
-    servoBoli.bajar();
-    delay(2000);
-    servoBoli.moverServo(3);
-    delay(2000);
-    servoBoli.moverServo(23);
-    delay(2000);
-    servoBoli.moverServo(3);
-    delay(2000);
-    servoBoli.moverServo(23);
-    delay(2000);
-
-    servoBoli.levantar();   
-    delay(2000);    
-    servoBoli.bajar();
-    delay(2000);
-    servoBoli.levantar();   
-    delay(2000);    
-    servoBoli.bajar();
-    delay(2000);
-
-  
-    //servoBoli.bajar();
-    //delay(2000);
-
-/*
     std::ifstream archivoGcode(argv[1]);
     if (!archivoGcode.is_open()) {
         printf("No se pudo abrir el archivo: %s\n", argv[1]);
         return 1;
     }
+
+    // Configuración del servo
+    ServoBoli servoBoli(config::pin_servoBoli);
     // Configuración de los motores
+
     DRV8825Driver motorX(config::MP1_step_pin, config::MP1_dir_pin,
-                          config::MP1_enable_pin);
+                        config::MP1_enable_pin);
     motorX.nombre = "motorX";
 
     DRV8825Driver motorY(config::MP2_step_pin, config::MP2_dir_pin,
-                          config::MP2_enable_pin);
+                        config::MP2_enable_pin);
     motorY.nombre = "motorY";
 
     // Configuración del planificador de movimiento
@@ -71,7 +45,8 @@ int main(int argc, char* argv []) {
     planificador.setFinalesDeCarrera(finXmin, finXmax, finYmin, finYmax);
 
     // Interpretación del archivo Gcode
-    Gcode gcode(planificador);
+    Gcode gcode(planificador, servoBoli);
+    
     std::string linea;
     while (std::getline(archivoGcode, linea)) {
         gcode.interpretar(linea);
@@ -92,7 +67,7 @@ int main(int argc, char* argv []) {
     }
 
     archivoGcode.close();
-    */
+
 
     printf("Fin del programa\n");
     return 0;

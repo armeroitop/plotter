@@ -2,7 +2,8 @@
 #include <sstream>
 #include <iostream>
 
-Gcode::Gcode(PlanificadorDeMovimiento& planificador) : planificador(planificador) { }
+Gcode::Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli)
+    : planificador(planificador), servoBoli(servoBoli) { }
 
 void Gcode::interpretar(const std::string& instruccion) {
     std::istringstream entrada(instruccion);
@@ -20,6 +21,12 @@ void Gcode::interpretar(const std::string& instruccion) {
             }
         }
         moverA(x, y);
+    } else if (comando == "M1"){
+        servoBoli.levantar();
+        std::cout << "Levantando el boli" << std::endl;
+    } else if(comando == "M2"){
+        servoBoli.bajar();
+        std::cout << "Bajando el boli" << std::endl;
     } else {
         std::cerr << "Comando no reconocido: " << comando << std::endl;
     }
