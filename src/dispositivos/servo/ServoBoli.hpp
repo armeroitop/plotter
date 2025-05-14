@@ -10,9 +10,13 @@ struct ServoBoli {
     bool esAbajo;     // Estado actual del servo
 
     ServoBoli(int pin, int anguloLevantado = 120, int anguloBajado = 0);
+    ~ServoBoli();
+
     void levantar();
     void bajar();
     bool estaAbajo() const;
+
+    void parar ();
     
     void moverServo(int angulo); // Método interno para mover el servo
 };

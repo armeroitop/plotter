@@ -8,6 +8,8 @@ struct DRV8825Driver : MotorDriver {
 
   DRV8825Driver(int step_pin, int dir_pin, int enable_pin);
 
+  ~DRV8825Driver() override;
+
   void siguienteSecuencia() override;
 
   void rotarPasos(int cantidadPasos) override;

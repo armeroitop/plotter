@@ -14,6 +14,15 @@ DRV8825Driver::DRV8825Driver(int step_pin, int dir_pin, int enable_pin)
 
     ponTiempoDePaso(100000);  // son 100ms - cada ms son 1000us
     secuenciaPaso = 2;
+
+    // Inicializar el motor en estado parado
+    parar();
+}
+
+DRV8825Driver::~DRV8825Driver() {
+    // Configurar todos los pines en LOW para desenergizar el motor
+    parar();
+    std::cout << "Destructor llamado: Pines configurados en LOW." << std::endl;
 }
 
 void DRV8825Driver::rotarPasos(int cantidadPasos) {
@@ -80,6 +89,12 @@ void DRV8825Driver::estableceSentidoGiro(int pasos) {
     }
 }
 
-void DRV8825Driver::parar() { digitalWrite(enable_pin, HIGH); }
+void DRV8825Driver::parar() { 
+    digitalWrite(step_pin, LOW);
+    digitalWrite(dir_pin, LOW);
+    digitalWrite(enable_pin, HIGH); 
+    sentidoGiro = SentidoGiro::Parado;
+    estaRotando = false;
+}
 
 void DRV8825Driver::arrancar() { digitalWrite(enable_pin, LOW); }

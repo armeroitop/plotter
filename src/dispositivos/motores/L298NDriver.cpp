@@ -10,6 +10,12 @@ L298NDriver::L298NDriver(int pinA, int pinB, int pinC, int pinD)
     pinMode(pinD, OUTPUT);
 }
 
+L298NDriver::~L298NDriver() {
+    // Configurar todos los pines en LOW para desenergizar el motor
+    parar();
+    std::cout << "Destructor llamado: Pines configurados en LOW." << std::endl;
+}
+
 void L298NDriver::siguienteSecuencia() {
     if (sentidoGiro == SentidoGiro::Horario) {
         // Aumentar paso en sentido horario
@@ -27,6 +33,7 @@ void L298NDriver::siguienteSecuencia() {
         }
     }
 }
+
 
 void L298NDriver::rotarPasos(int cantidadPasos) {
     // Si el motor está en funcionamiento, no iniciar una nueva tarea

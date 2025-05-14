@@ -10,6 +10,8 @@ struct L298NDriver : MotorDriver {
 
     L298NDriver(int pinA, int pinB, int pinC, int pinD);
 
+    ~L298NDriver() override;
+    
     void siguienteSecuencia() override;
 
     void rotarPasos(int cantidadPasos) override;
