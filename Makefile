@@ -82,19 +82,19 @@ endef
 ##########################################
 #### CONFIG
 ##########################################
-
-APP		:= game
+# Configuración de variables para el proyecto
+APP			:= plotter
 C_FLAGS		:= -Wall -pedantic -std=c++17
-CC_FLAGS		:= $(C_FLAGS)
-CC		:= g++
-C		:= gcc
+CC_FLAGS	:= $(C_FLAGS)
+CC			:= g++
+C			:= gcc
 MKDIR		:= mkdir -p
-SRC		:= src
-OBJ		:= obj
-LIBS_DIR		:= libs
+SRC			:= src
+OBJ			:= obj
+LIBS_DIR	:= libs
 LIBS 		:= -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt 
 INC_DIRS 	:= -I$(SRC) -I$(LIBS_DIR) -I/usr/local/include 
-RM 		:= rm
+RM 			:= rm
 DEBUG		:= 1
 
 #Usa lasiguiente expresión para compilar con DEBUG y poder hacer depuración
@@ -124,7 +124,7 @@ endif
 #   - Asegúrate de que la variable $(SRC) esté definida y sea un
 #     directorio existente para evitar errores al ejecutar el Makefile.
 #
-SUB_DIRS		:= $(shell find $(SRC) -type d)
+SUB_DIRS	:= $(shell find $(SRC) -type d)
 
 # Definición de la variable OBJSUB_DIRS.
 #
