@@ -59,9 +59,8 @@ void L298NDriver::rotar() {
         energizarBobinaActual();
         pasoActual++;
 
-        printf("En rotar mi paso es%d \n", pasoActual);
-        printf("En rotar tiempodeInicio es %lld  y tiempo es %lld\n",
-               tiempoDeInicio, obtenerTiempoActualMs());
+        //printf("En rotar mi paso es%d \n", pasoActual);
+        //printf("En rotar tiempodeInicio es %lld  y tiempo es %lld\n", tiempoDeInicio, obtenerTiempoActualMs());
     }
 
     if (haCompletadoPasos()) {

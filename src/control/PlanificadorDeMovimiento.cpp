@@ -21,7 +21,10 @@ void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
 }
 
 void PlanificadorDeMovimiento::moverA(float x, float y) {
+    printf("PlanificadorDeMovimiento::moverA x: %f, y: %f \n", x, y);
+
     if (paradaEmergencia) {
+        printf("Por lo visto paradaEmergencia es true :\n");
         return;
     }
 
@@ -35,8 +38,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     int tiempoPasoY = 10000;
     calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
-    printf("tiempoPasoX %i \n", tiempoPasoX);
-    printf("tiempoPasoY %i \n", tiempoPasoY);
+    //printf("tiempoPasoX %i \n", tiempoPasoX);
+    //printf("tiempoPasoY %i \n", tiempoPasoY);
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);

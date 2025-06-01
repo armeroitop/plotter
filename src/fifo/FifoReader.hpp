@@ -20,4 +20,7 @@ private:
     GcodeQueue& queue;
     std::thread readerThread;
     std::atomic<bool> running;
+    
+    // Descriptor de archivo para mantener el FIFO abierto
+    int dummyWriterFd = -1; 
 };

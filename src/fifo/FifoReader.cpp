@@ -4,12 +4,17 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <algorithm> // para std::remove
 
 FifoReader::FifoReader(const std::string& fifoPath, GcodeQueue& queue)
-    : fifoPath(fifoPath), queue(queue), running(false) {}
+    : fifoPath(fifoPath), queue(queue), running(false) { }
 
 FifoReader::~FifoReader() {
     stop();
+
+    if (dummyWriterFd != -1) {
+        close(dummyWriterFd);
+    }
 }
 
 void FifoReader::start() {
@@ -23,6 +28,12 @@ void FifoReader::start() {
         }
     }
 
+    // Mantener abierto un descriptor de escritura "dummy"
+    dummyWriterFd = open(fifoPath.c_str(), O_WRONLY | O_NONBLOCK);
+    if (dummyWriterFd == -1) {
+        perror("dummy open");
+    }
+
     readerThread = std::thread(&FifoReader::readLoop, this);
 }
 
@@ -31,26 +42,54 @@ void FifoReader::stop() {
     if (readerThread.joinable()) {
         readerThread.join();
     }
+
+     if (dummyWriterFd != -1) {
+        close(dummyWriterFd);
+        dummyWriterFd = -1;
+    }
 }
 
 void FifoReader::readLoop() {
-    while (running) {
-        std::ifstream fifo(fifoPath);
-        if (!fifo.is_open()) {
-            std::cerr << "[FifoReader] Error abriendo el FIFO.\n";
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            continue;
-        }
-
-        std::string line;
-        while (std::getline(fifo, line) && running) {
-            if (!line.empty()) {
-                queue.push(line);
-                std::cout << "[FifoReader] G-code recibido: " << line << std::endl;
-            }
-        }
-
-        fifo.close();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::ifstream fifo(fifoPath);
+    if (!fifo.is_open()) {
+        std::cerr << "[FifoReader] Error abriendo el FIFO.\n";
+        return;
     }
+
+    std::string linea;
+    while (running) {
+        if (std::getline(fifo, linea)) {
+            if (!linea.empty()) {
+                if (linea[0] == '@') {
+                    std::string rutaArchivo = linea.substr(1);
+                    std::ifstream archivoGcode(rutaArchivo);
+                    if (!archivoGcode.is_open()) {
+                        std::cerr << "[FifoReader] Error abriendo archivo: " << rutaArchivo << std::endl;
+                        continue;
+                    }
+
+                    std::string lineaArchivo;
+                    while (std::getline(archivoGcode, lineaArchivo)) {
+                        if (!lineaArchivo.empty()) {
+                            std::cout << "[FifoReader] G-code de archivo: " << lineaArchivo << std::endl;
+                            queue.push(lineaArchivo);
+                        }
+                    }
+
+                    archivoGcode.close();
+                } else {
+                    std::cout << "[FifoReader] G-code recibido: " << linea << std::endl;
+                    queue.push(linea);
+                }
+            }
+        } else {
+            // Si EOF o error, esperar un poco y continuar
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            fifo.clear();  // limpiar estado de EOF
+        }
+    }
+
+    fifo.close();
 }
+
+

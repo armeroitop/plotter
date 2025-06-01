@@ -20,7 +20,7 @@ struct PlanificadorDeMovimiento {
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
     float velocidadAngularMax = 0.0001f; // pasos/microisegundos
 
-    bool paradaEmergencia;
+    bool paradaEmergencia = false;
 
     explicit PlanificadorDeMovimiento();
 

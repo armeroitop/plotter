@@ -20,6 +20,7 @@ void Gcode::interpretar(const std::string& instruccion) {
                 entrada >> y;
             }
         }
+        std::cout << "[Gcode::interpretar] Recibido: " << instruccion << std::endl;
         moverA(x, y);
     } else if (comando == "M1"){
         servoBoli.levantar();
@@ -33,6 +34,6 @@ void Gcode::interpretar(const std::string& instruccion) {
 }
 
 void Gcode::moverA(int x, int y) {
-    printf("Gcode X: %i, Y: %i  \n", x, y);
+    printf("Gcode.moverA X: %i, Y: %i  \n", x, y);
     planificador.moverA(x, y);
 }

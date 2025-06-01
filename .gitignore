@@ -1,5 +1,6 @@
 # Ignorar archivos y directorios temporales de compilación
 **/obj/
+.Trash-1000/
 
 # Ignorar archivos binarios y ejecutables
 **/*.exe

@@ -48,21 +48,42 @@ Este proyecto implementa un plotter CNC controlado por una Banana Pi M2 Zero, ca
    G1 X50 Y60
    ```
 
-2. **Ejecuta el programa:**
-   ```bash
-   sudo ./plotter archivo.gcode
-   ```
+2. **Conecta los motores, servo y finales de carrera según la configuración de pines en `src/include/config.hpp`.**
+
+## Ejecución
+### Ejecutar en modo FIFO (modo interactivo recomendado)
+
+```bash
+sudo ./plotter
+```
+
+Una vez iniciado, puedes enviar comandos así:
+
+#### Enviar un comando G-code manualmente:
+
+```bash
+echo "G1 X10 Y10" > /tmp/gcode_pipe
+```
+
+#### Enviar un archivo `.gcode` completo:
+
+```bash
+echo "@/home/davidBPI/gcodes/circulo.gcode" > /tmp/gcode_pipe
+```
+
+El programa leerá y ejecutará todas las líneas del archivo enviado.
 
 3. **Observa cómo el plotter mueve el bolígrafo y ejecuta los movimientos especificados.**
 
 ## Estructura del proyecto
 
-- `src/main.cpp`: Punto de entrada del programa.
-- `src/parseador/Gcode.cpp`: Interpretación de comandos G-code.
-- `src/control/PlanificadorDeMovimiento.cpp`: Lógica de planificación de movimientos.
-- `src/dispositivos/motores/`: Drivers para motores DRV8825 y L298N.
-- `src/dispositivos/servo/ServoBoli.cpp`: Control del servo para el bolígrafo.
-- `src/include/config.hpp`: Configuración de pines y parámetros.
+* `src/main.cpp`: Punto de entrada del programa.
+* `src/parseador/Gcode.cpp`: Interpretación de comandos G-code.
+* `src/control/PlanificadorDeMovimiento.cpp`: Lógica de planificación de movimientos.
+* `src/dispositivos/motores/`: Drivers para motores DRV8825 y L298N.
+* `src/dispositivos/servo/ServoBoli.cpp`: Control del servo para el bolígrafo.
+* `src/include/config.hpp`: Configuración de pines y parámetros.
+* `src/io/FifoReader.cpp`: Lectura de comandos y archivos G-code desde FIFO.
 
 ## Comandos G-code soportados
 
@@ -77,3 +98,24 @@ Desarrollado por David Gerardo Martínez Armero.
 ---
 
 ¡Contribuciones y mejoras son bienvenidas!
+
+
+
+
+## Nuevas funcionalidades
+
+Desde la nueva versión, el programa ahora puede:
+
+- **Escuchar comandos G-code en tiempo real** a través de un FIFO (`/tmp/gcode_pipe`).
+- **Aceptar archivos `.gcode` durante la ejecución** escribiendo una línea con `@ruta/del/archivo.gcode` en el FIFO.
+
+Esto permite enviar comandos desde otros programas, scripts o una interfaz web sin reiniciar el programa.
+
+
+
+
+
+
+
+
+
