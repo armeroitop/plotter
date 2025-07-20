@@ -88,6 +88,8 @@ Este proyecto implementa un plotter CNC controlado por una Banana Pi M2 Zero, ca
 ## Comandos G-code soportados
 
 - `G1 Xn Yn` — Mueve el cabezal a la posición (X, Y).
+- `G90` — Cambia a movimiento relativo.
+- `G91` — Cambia a movimiento absoluto.
 - `M1` — Levanta el bolígrafo.
 - `M2` — Baja el bolígrafo.
 
