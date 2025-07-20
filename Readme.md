@@ -51,27 +51,27 @@ Este proyecto implementa un plotter CNC controlado por una Banana Pi M2 Zero, ca
 2. **Conecta los motores, servo y finales de carrera según la configuración de pines en `src/include/config.hpp`.**
 
 ## Ejecución
-### Ejecutar en modo FIFO (modo interactivo recomendado)
+1. **Ejecutar en modo FIFO (modo interactivo recomendado)**
 
-```bash
-sudo ./plotter
-```
+   ```bash
+   sudo ./plotter
+   ```
 
-Una vez iniciado, puedes enviar comandos así:
+   Una vez iniciado, puedes enviar comandos así:
 
-#### Enviar un comando G-code manualmente:
+2. **Enviar un comando G-code manualmente:**
 
-```bash
-echo "G1 X10 Y10" > /tmp/gcode_pipe
-```
+   ```bash
+   echo "G1 X10 Y10" > /tmp/gcode_pipe
+   ```
 
-#### Enviar un archivo `.gcode` completo:
+3. **Enviar un archivo `.gcode` completo:**
 
-```bash
-echo "@/home/davidBPI/gcodes/circulo.gcode" > /tmp/gcode_pipe
-```
+   ```bash
+   echo "@/home/davidBPI/gcodes/circulo.gcode" > /tmp/gcode_pipe
+   ```
 
-El programa leerá y ejecutará todas las líneas del archivo enviado.
+    El programa leerá y ejecutará todas las líneas del archivo enviado.
 
 3. **Observa cómo el plotter mueve el bolígrafo y ejecuta los movimientos especificados.**
 
@@ -97,7 +97,6 @@ Desarrollado por David Gerardo Martínez Armero.
 
 ---
 
-¡Contribuciones y mejoras son bienvenidas!
 
 
 

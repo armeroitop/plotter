@@ -57,6 +57,10 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     actualizarPosicion(x, y);
 }
 
+void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY) {
+    moverA(x_actual + deltaX, y_actual + deltaY);
+}
+
 void PlanificadorDeMovimiento::calcularPasos(float x, float y,
                                              int& pasosMotorX,
                                              int& pasosMotorY) {

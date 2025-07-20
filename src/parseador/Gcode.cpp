@@ -10,6 +10,8 @@ void Gcode::interpretar(const std::string& instruccion) {
     std::string comando;
     entrada >> comando;
 
+    std::cout << "[Gcode::interpretar] Recibido: " << instruccion << std::endl;
+
     if (comando == "G1") {
         int x = 0, y = 0;
         char eje;
@@ -20,12 +22,25 @@ void Gcode::interpretar(const std::string& instruccion) {
                 entrada >> y;
             }
         }
-        std::cout << "[Gcode::interpretar] Recibido: " << instruccion << std::endl;
-        moverA(x, y);
-    } else if (comando == "M1"){
+
+        if (modoRelativo) {
+            printf("anificador.moverRelativo X: %i, Y: %i  \n", x, y);
+            planificador.moverRelativo(x, y);
+        } else {
+            printf("planificador.moverA X: %i, Y: %i  \n", x, y);
+            planificador.moverA(x, y);
+        }
+
+    } else if (comando == "G90") {
+        modoRelativo = false;
+        std::cout << "Modo ABSOLUTO activado" << std::endl;
+    } else if (comando == "G91") {
+        modoRelativo = true;
+        std::cout << "Modo RELATIVO activado" << std::endl;
+    } else if (comando == "M1") {
         servoBoli.levantar();
         std::cout << "Levantando el boli" << std::endl;
-    } else if(comando == "M2"){
+    } else if (comando == "M2") {
         servoBoli.bajar();
         std::cout << "Bajando el boli" << std::endl;
     } else {
@@ -33,7 +48,3 @@ void Gcode::interpretar(const std::string& instruccion) {
     }
 }
 
-void Gcode::moverA(int x, int y) {
-    printf("Gcode.moverA X: %i, Y: %i  \n", x, y);
-    planificador.moverA(x, y);
-}

@@ -9,9 +9,11 @@ struct Gcode {
     Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli);
     void interpretar(const std::string& instruccion);
 
+    bool modoRelativo = false; // Modo de coordenadas relativas
+
     private:
     PlanificadorDeMovimiento& planificador;
     ServoBoli& servoBoli;
 
-    void moverA(int x, int y);
+
 };

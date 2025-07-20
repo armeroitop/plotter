@@ -225,7 +225,7 @@ info :
 	$(info $(ALL_OBJ))
 
 clean:
-	$(RM) -r ./$(OBJ)
+	$(RM) -rf ./$(OBJ)
 
 cleanall: clean
 	$(RM) "./$(APP)"

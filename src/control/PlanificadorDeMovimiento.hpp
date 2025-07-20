@@ -38,6 +38,9 @@ struct PlanificadorDeMovimiento {
     // Calcula trayectorias y activa los motores.
     void moverA(float x, float y);
 
+    // Mueve de forma relativa a la posición actual.
+    void moverRelativo(float deltaX, float deltaY);
+
     void moverMotorX(int pasos, bool direccion); // Avanza pasos en X.
     void moverMotorY(int pasos, bool direccion); // Avanza pasos en Y.
 
