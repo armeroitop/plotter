@@ -62,6 +62,9 @@ void FifoReader::readLoop() {
             if (!linea.empty()) {
                 if (linea[0] == '@') {
                     std::string rutaArchivo = linea.substr(1);
+                     // Trim inicial
+                    rutaArchivo.erase(0, rutaArchivo.find_first_not_of(" \t\n\r"));
+                    
                     std::ifstream archivoGcode(rutaArchivo);
                     if (!archivoGcode.is_open()) {
                         std::cerr << "[FifoReader] Error abriendo archivo: " << rutaArchivo << std::endl;
