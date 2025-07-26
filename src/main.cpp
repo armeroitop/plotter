@@ -8,6 +8,7 @@
 #include "fifo/FifoReader.hpp"
 #include "fifo/GcodeExecutor.hpp"
 #include "fifo/GcodeQueue.hpp"
+#include "fifo/FifoWriter.hpp"
 
 #include "control/PlanificadorDeMovimiento.hpp"
 #include "dispositivos/motores/DRV8825Driver.hpp"
@@ -56,6 +57,16 @@ int main() {
     executor.start();
 
     std::cout << "[main] Esperando comandos en /tmp/gcode_pipe (Ctrl+C para salir)\n";
+
+    FifoWriter writer("/tmp/plotter_out");
+    writer.start();
+
+    if (writer.isReady()) {
+        writer.write("Inicio correcto del planificador");
+    } else {
+        std::cerr << "No se pudo iniciar la comunicación con el FIFO." << std::endl;
+    }
+
 
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(200));

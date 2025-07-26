@@ -60,6 +60,7 @@ void FifoReader::readLoop() {
     while (running) {
         if (std::getline(fifo, linea)) {
             if (!linea.empty()) {
+                // Si es una linea de procesar un archivo, lo leemos y enviamos la queue todo su contenido
                 if (linea[0] == '@') {
                     std::string rutaArchivo = linea.substr(1);
                      // Trim inicial
@@ -80,6 +81,7 @@ void FifoReader::readLoop() {
                     }
 
                     archivoGcode.close();
+                // Si es una línea normal de G-code, la procesamos directamente
                 } else {
                     std::cout << "[FifoReader] G-code recibido: " << linea << std::endl;
                     queue.push(linea);
