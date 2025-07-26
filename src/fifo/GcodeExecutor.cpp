@@ -2,9 +2,11 @@
 #include "GcodeExecutor.hpp"
 #include <iostream>
 #include <chrono>
+#include "fifo/FifoWriter.hpp"
+
 
 GcodeExecutor::GcodeExecutor(GcodeQueue& queue, Gcode& gcode)
-    : queue(queue), gcode(gcode), running(false) {}
+    : queue(queue), gcode(gcode), running(false) { }
 
 GcodeExecutor::~GcodeExecutor() {
     stop();
@@ -27,6 +29,12 @@ void GcodeExecutor::executionLoop() {
         std::string linea = queue.pop(); // Espera si la cola está vacía
         std::cout << "[Executor] Ejecutando: " << linea << std::endl;
         gcode.interpretar(linea);
+
+        if (FifoWriter::isReady()) {
+            FifoWriter::write("Linea interpretada: " + linea);
+        } else {
+            std::cerr << "No se ha interpretado nada" << std::endl;
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Opcional
     }

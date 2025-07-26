@@ -3,9 +3,11 @@
 #include <sys/stat.h>
 #include <unistd.h> 
 
-
-FifoWriter::FifoWriter(const std::string& fifoPath)
-    :fifoPath(fifoPath) { }
+std::string FifoWriter::fifoPath;
+std::ofstream FifoWriter::fifoStream;
+std::mutex FifoWriter::writeMutex;
+bool FifoWriter::started = false;
+int FifoWriter::fd = -1;
 
 FifoWriter::~FifoWriter() {
     if (fifoStream.is_open()) {
@@ -17,9 +19,25 @@ FifoWriter::~FifoWriter() {
     }
 }
 
-void FifoWriter::start() {
-    if (started) return;
-    started = true;
+void FifoWriter::stop() {
+    std::lock_guard<std::mutex> lock(writeMutex);
+
+    if (fifoStream.is_open()) {
+        fifoStream.close();
+    }
+
+    if (fd != -1) {
+        close(fd);
+    }
+    started = false;
+}
+
+void FifoWriter::start(const std::string& path) {
+    std::lock_guard<std::mutex> lock(writeMutex);
+
+    if (started) return;    
+
+    fifoPath = path;
 
     // Crear el FIFO si no existe
     if (access(fifoPath.c_str(), F_OK) == -1) {
@@ -38,6 +56,9 @@ void FifoWriter::start() {
         std::cout << "[FifoWriter] FIFO abierto correctamente: " << fifoPath << std::endl;
     }
 
+
+    started = true;
+
     /* fifoStream.open(fifoPath, std::ios::out);
     if (!fifoStream.is_open()) {
         std::cerr << "[FifoWriter] Error al abrir el FIFO para escritura.\n";
@@ -46,6 +67,7 @@ void FifoWriter::start() {
 
 // Método para escribir un mensaje en el FIFO
 void FifoWriter::write(const std::string& message) {
+    std::lock_guard<std::mutex> lock(writeMutex);
 
     if (fd == -1) {
         std::cerr << "[FifoWriter] FIFO no está abierto para escritura.\n";
@@ -69,6 +91,6 @@ void FifoWriter::write(const std::string& message) {
 }
 
 
-bool FifoWriter::isReady() const {
+bool FifoWriter::isReady() {
     return fd != -1;
 }

@@ -57,12 +57,14 @@ int main() {
     executor.start();
 
     std::cout << "[main] Esperando comandos en /tmp/gcode_pipe (Ctrl+C para salir)\n";
+    
+    FifoWriter::start("/tmp/plotter_out");
+    
+    //FifoWriter writer("/tmp/plotter_out");
+    //writer.start("/tmp/plotter_out");
 
-    FifoWriter writer("/tmp/plotter_out");
-    writer.start();
-
-    if (writer.isReady()) {
-        writer.write("Inicio correcto del planificador");
+    if (FifoWriter::isReady()) {
+        FifoWriter::write("Inicio correcto del planificador STATIC");
     } else {
         std::cerr << "No se pudo iniciar la comunicación con el FIFO." << std::endl;
     }
@@ -74,6 +76,7 @@ int main() {
 
     fifoReader.stop();
     executor.stop();
+    FifoWriter::stop();
 
     std::cout << "[main] Sistema detenido correctamente.\n";
     return 0;
