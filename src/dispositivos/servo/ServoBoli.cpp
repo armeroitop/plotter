@@ -40,9 +40,10 @@ bool ServoBoli::estaAbajo() const {
     return esAbajo;
 }
 
-void ServoBoli::parar() {
-    // Detener el servo
-    softPwmWrite(pin, 0);
+void ServoBoli::liberar() {
+    // Liberar tensión en el servo
+    softPwmWrite(pin, 0); // deja de enviar PWM, servo queda flojo    
+    printf("Liberando tensión en el servo.\n");
 }
 
 void ServoBoli::moverServo(int angulo) {

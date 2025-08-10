@@ -43,6 +43,9 @@ void Gcode::interpretar(const std::string& instruccion) {
     } else if (comando == "M2") {
         servoBoli.bajar();
         std::cout << "Bajando el boli" << std::endl;
+    } else if (comando == "M999") {
+        servoBoli.liberar();
+        std::cout << "[GCODE] Liberar tensión en servo del boli" << std::endl;
     } else {
         std::cerr << "Comando no reconocido: " << comando << std::endl;
     }

@@ -16,7 +16,7 @@ struct ServoBoli {
     void bajar();
     bool estaAbajo() const;
 
-    void parar ();
+    void liberar(); // Método para liberar tensión en el servo
     
     void moverServo(int angulo); // Método interno para mover el servo
 };
