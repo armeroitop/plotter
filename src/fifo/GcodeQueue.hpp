@@ -7,12 +7,14 @@
 
 class GcodeQueue {
 public:
-    void push(const std::string& command);
+    //void push(const std::string& command);
+    void push_back(const std::string& command);
+    void push_front(const std::string& command);
     std::string pop();
     bool empty() const;
 
 private:
-    std::queue<std::string> queue;
+    std::deque<std::string> queue;
     mutable std::mutex mutex;
     std::condition_variable condVar;
 };

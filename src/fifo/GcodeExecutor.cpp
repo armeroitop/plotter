@@ -31,9 +31,9 @@ void GcodeExecutor::executionLoop() {
         gcode.interpretar(linea);
 
         if (FifoWriter::isReady()) {
-            FifoWriter::write("Linea interpretada: " + linea);
+            FifoWriter::write("[Executor] Linea interpretada: " + linea);
         } else {
-            std::cerr << "No se ha interpretado nada" << std::endl;
+            std::cerr << "[Executor] No se ha interpretado nada" << std::endl;
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Opcional

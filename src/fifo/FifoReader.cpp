@@ -63,7 +63,7 @@ void FifoReader::readLoop() {
                 // Si es una linea de procesar un archivo, lo leemos y enviamos la queue todo su contenido
                 if (linea[0] == '@') {
                     std::string rutaArchivo = linea.substr(1);
-                     // Trim inicial
+                     // Trim inicial - le quita espacios en blanco al inicio
                     rutaArchivo.erase(0, rutaArchivo.find_first_not_of(" \t\n\r"));
                     
                     std::ifstream archivoGcode(rutaArchivo);
@@ -76,15 +76,21 @@ void FifoReader::readLoop() {
                     while (std::getline(archivoGcode, lineaArchivo)) {
                         if (!lineaArchivo.empty()) {
                             std::cout << "[FifoReader] G-code de archivo: " << lineaArchivo << std::endl;
-                            queue.push(lineaArchivo);
+                            queue.push_back(lineaArchivo);
                         }
                     }
 
                     archivoGcode.close();
                 // Si es una línea normal de G-code, la procesamos directamente
                 } else {
-                    std::cout << "[FifoReader] G-code recibido: " << linea << std::endl;
-                    queue.push(linea);
+                    // Parada de emergencia - Le da prioridad a la parada de emergencia
+                    if( linea == "M112"){
+                        queue.push_front(linea); 
+                    } else{
+                        std::cout << "[FifoReader] G-code recibido: " << linea << std::endl;
+                        queue.push_back(linea);
+                    }
+
                 }
             }
         } else {

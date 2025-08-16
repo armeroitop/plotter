@@ -14,7 +14,7 @@ ServoBoli::ServoBoli(int pin, int anguloLevantado, int anguloBajado) :
         exit(1);
     }
 
-    auto res = softPwmCreate(pin, 0, 100);
+    softPwmCreate(pin, 0, 100);
     //printf("softPwmCreate devolvió: %d\n", res);
 }
 

@@ -33,19 +33,24 @@ void Gcode::interpretar(const std::string& instruccion) {
 
     } else if (comando == "G90") {
         modoRelativo = false;
-        std::cout << "Modo ABSOLUTO activado" << std::endl;
+        std::cout << "[GCODE] Modo ABSOLUTO activado" << std::endl;
     } else if (comando == "G91") {
         modoRelativo = true;
-        std::cout << "Modo RELATIVO activado" << std::endl;
+        std::cout << "[GCODE] Modo RELATIVO activado" << std::endl;
     } else if (comando == "M1") {
         servoBoli.levantar();
-        std::cout << "Levantando el boli" << std::endl;
+        std::cout << "[GCODE] Levantando el boli" << std::endl;
     } else if (comando == "M2") {
         servoBoli.bajar();
-        std::cout << "Bajando el boli" << std::endl;
+        std::cout << "[GCODE] Bajando el boli" << std::endl;
     } else if (comando == "M999") {
         servoBoli.liberar();
+        planificador.desactivarParadaDeEmergencia();
         std::cout << "[GCODE] Liberar tensión en servo del boli" << std::endl;
+    } else if (comando == "M112") {
+        servoBoli.liberar();
+        planificador.activarParadaDeEmergencia();
+        std::cout << "[GCODE] Parada de emergencia" << std::endl;
     } else {
         std::cerr << "Comando no reconocido: " << comando << std::endl;
     }

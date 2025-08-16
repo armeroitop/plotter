@@ -1,4 +1,5 @@
 #include "PlanificadorDeMovimiento.hpp"
+#include "fifo/FifoWriter.hpp"
 #include <cmath>
 
 PlanificadorDeMovimiento::PlanificadorDeMovimiento() { }
@@ -48,13 +49,15 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     // Mover los motores hasta llegar a la posicion. 
     arrancar();
 
-    while (movimientoEnCurso() && !alcanzaFinalDeCarrera()) {
+    while (movimientoEnCurso() && !alcanzaFinalDeCarrera() && !paradaEmergencia) {
         rotar();
+        // TODO: Se debería actualizar la posición actual aquí
     }
 
     detener();
 
     actualizarPosicion(x, y);
+    enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
 
 void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY) {
@@ -125,11 +128,21 @@ bool PlanificadorDeMovimiento::alcanzaFinalDeCarrera() {
     return false;
 }
 
-void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) { }
+void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) { 
+
+}
 
 void PlanificadorDeMovimiento::actualizarPosicion(float x, float y) {
     x_actual = x;
     y_actual = y;
+}
+
+void PlanificadorDeMovimiento::enviarPosicionFifo() {
+    if (FifoWriter::isReady()) {
+        FifoWriter::write("Posicion actual: (" + std::to_string(x_actual) + ", " + std::to_string(y_actual) + ")");
+    } else {
+        std::cerr << "[PlanificadorDeMovimiento] No se pudo enviar la posición por FIFO" << std::endl;
+    }
 }
 
 void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY) {

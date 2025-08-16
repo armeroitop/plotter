@@ -63,6 +63,9 @@ struct PlanificadorDeMovimiento {
     void obtenerPosicion(float& x, float& y); // Retorna la posición actual.
     void actualizarPosicion(float x, float y); // Actualiza la posición actual.
 
+    // Enviar la poscion x y por fifowriter
+    void enviarPosicionFifo();
+
     void configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY);
      
 
