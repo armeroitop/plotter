@@ -93,7 +93,7 @@ SRC			:= src
 OBJ			:= obj
 LIBS_DIR	:= libs
 LIBS 		:= -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt 
-INC_DIRS 	:= -I$(SRC) -I$(LIBS_DIR) -I/usr/local/include 
+INC_DIRS 	:= -I$(SRC) -I$(LIBS_DIR) -I/usr/local/include -isystem /usr/include/nlohmann
 RM 			:= rm
 DEBUG		:= 1
 

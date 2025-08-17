@@ -17,6 +17,7 @@
 #include "dispositivos/servo/ServoBoli.hpp"
 #include "parseador/Gcode.hpp"
 #include "include/config.hpp"
+#include "include/cargaParametros.hpp"
 
 std::atomic<bool> running(true);
 
@@ -28,6 +29,19 @@ void signalHandler(int signum) {
 int main() {
     std::signal(SIGINT, signalHandler);
     wiringPiSetup();
+
+    // Cargar parámetros desde el archivo JSON
+    Parametros parametros;
+    try {
+        parametros = cargarParametros("src/include/parametros.json");
+        std::cout << "[main] Parámetros cargados: "
+                  << "Velocidad Max: " << parametros.velocidadMax
+                  << ", Aceleración: " << parametros.aceleracion
+                  << ", Puerto Serie: " << parametros.puertoSerie << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[main] Error al cargar parámetros: " << e.what() << std::endl;
+        return 1; // Salir si no se pueden cargar los parámetros
+    }
 
     // === Configuración ===
     ServoBoli servoBoli(config::pin_servoBoli);

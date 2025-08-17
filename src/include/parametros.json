@@ -1,0 +1,5 @@
+{
+  "velocidadMax": 666,
+  "aceleracion": 1000,
+  "puertoSerie": "/dev/ttyUSB0"
+}
