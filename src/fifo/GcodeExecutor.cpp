@@ -27,10 +27,11 @@ void GcodeExecutor::stop() {
 void GcodeExecutor::executionLoop() {
     while (running) {
         std::string linea = queue.pop(); // Espera si la cola está vacía
-        std::cout << "[Executor] Ejecutando: " << linea << std::endl;
-        gcode.interpretar(linea);
+        std::cout << "[Executor] Ejecutando: " << linea << std::endl;        
 
         if (FifoWriter::isReady()) {
+            FifoWriter::write("[Executor] Ejecutando: " + linea);
+            gcode.interpretar(linea);
             FifoWriter::write("[Executor] Linea interpretada: " + linea);
         } else {
             std::cerr << "[Executor] No se ha interpretado nada" << std::endl;
