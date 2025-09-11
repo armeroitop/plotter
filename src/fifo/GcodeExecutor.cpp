@@ -24,6 +24,14 @@ void GcodeExecutor::stop() {
     }
 }
 
+/**
+ * @brief Bucle principal de ejecución del GcodeExecutor.
+ *
+ * Extrae comandos G-code de la cola de manera secuencial y los interpreta.
+ * Si el FIFO de escritura está disponible, registra el inicio y el resultado de la interpretación.
+ * El bucle se mantiene activo mientras la variable 'running' sea verdadera.
+ * Hace una pausa breve entre comandos para evitar saturar el sistema.
+ */
 void GcodeExecutor::executionLoop() {
     while (running) {
         std::string linea = queue.pop(); // Espera si la cola está vacía

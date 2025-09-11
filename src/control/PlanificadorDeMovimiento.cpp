@@ -1,4 +1,6 @@
 #include "PlanificadorDeMovimiento.hpp"
+#include "../dispositivos/interruptores/FinalDeCarrera.hpp"
+#include "../dispositivos/motores/DRV8825Driver.hpp"
 #include "fifo/FifoWriter.hpp"
 #include <cmath>
 
@@ -117,18 +119,27 @@ bool PlanificadorDeMovimiento::movimientoEnCurso() {
 }
 
 bool PlanificadorDeMovimiento::alcanzaFinalDeCarrera() {
-    if (p_finXmin->esPulsado()
-            || p_finXmax->esPulsado()
-            || p_finYmin->esPulsado()
-            || p_finYmax->esPulsado()) {
+    
+    return comprobarFin(p_finXmin, "Xmin") ||
+           comprobarFin(p_finXmax, "Xmax") ||
+           comprobarFin(p_finYmin, "Ymin") ||
+           comprobarFin(p_finYmax, "Ymax");
+}
+
+bool PlanificadorDeMovimiento::comprobarFin(FinalDeCarrera* sensor, const std::string& nombre) {
+    if (sensor->esPulsado()) {
+        ultimoFinDeCarreraActivado = nombre;
         activarParadaDeEmergencia();
+        // TODO: Quizás aquí estaría bien enviar por FIFOWRITER quien ha sido el sensor pulsado
+        std::cout << "[PlanificadorDeMovimiento] Final de carrera: " << nombre << " activado. Parada de emergencia." << std::endl;
+        FifoWriter::write("[Parada] Final de carrera: " + nombre );
         return true;
     }
-
     return false;
 }
 
-void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) { 
+
+void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) {
 
 }
 
@@ -150,7 +161,7 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
     p_motorY->rotarPasos(pasosMotorY);
     p_motorX->ponTiempoDePaso(tiempoPasoX);
     p_motorY->ponTiempoDePaso(tiempoPasoY);
-    
+
 }
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {

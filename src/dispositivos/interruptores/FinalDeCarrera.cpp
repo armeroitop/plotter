@@ -9,6 +9,12 @@ FinalDeCarrera::FinalDeCarrera(int pin) : pin { pin } {
 
 }
 
+/**
+ * @brief Detecta si el final de carrera ha sido pulsado, con gestión de rebotes.
+ * 
+ * @return true  si el final de carrera ha sido pulsado
+ * @return false si no ha sido pulsado
+ */
 bool FinalDeCarrera::esPulsado() {
     int lectura = digitalRead(pin);
 

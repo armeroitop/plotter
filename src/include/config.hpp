@@ -3,16 +3,16 @@
 namespace config {
 
 //** Final de carrera Eje X menor ****************
-constexpr int pin_finXmin      = 29;
+constexpr int pin_finXmin      = 28;
 
 //** Final de carrera Eje X mayor ****************
-constexpr int pin_finXmax      = 28;
+constexpr int pin_finXmax      = 26;
 
 //** Final de carrera Eje Y menor ****************
-constexpr int pin_finYmin      = 27;
+constexpr int pin_finYmin      = 29;
 
 //** Final de carrera Eje Y mayor ****************
-constexpr int pin_finYmax      = 26;
+constexpr int pin_finYmax      = 27;
 
 //** Motor X de pasos 1 - Driver DRV8825 ****************
 constexpr int MP1_step_pin      = 0;
