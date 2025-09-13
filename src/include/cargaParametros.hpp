@@ -32,8 +32,8 @@ Parametros cargarParametros(const std::string& ruta) {
     parametro.aceleracion  = j.value("aceleracion", 100);
     parametro.puertoSerie  = j.value("puertoSerie", "/dev/ttyUSB0");
 
-    parametros.ancho_mm = j.value("ancho_mm", 200); // valor por defecto si no existe
-    parametros.alto_mm  = j.value("alto_mm", 200);
+    parametro.ancho_mm = j.value("ancho_mm", 200); // valor por defecto si no existe
+    parametro.alto_mm  = j.value("alto_mm", 200);
 
     return parametro;
 }

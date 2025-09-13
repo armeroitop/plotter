@@ -2,6 +2,7 @@
 //#include "../dispositivos/motores/DRV8825Driver.hpp"
 //#include "../dispositivos/interruptores/FinalDeCarrera.hpp"
 #include <string>
+#include <utility> //std::pair
 
 // Forward declarations
 class MotorDriver;
@@ -18,7 +19,7 @@ struct PlanificadorDeMovimiento {
 
     std::string ultimoFinDeCarreraActivado;
     
-    int x_actual = 0, y_actual = 0;
+    float x_actual = 0, y_actual = 0;
 
     float velocidadUnitariaMax = 0;
     float velocidadX = 0;
@@ -68,7 +69,7 @@ struct PlanificadorDeMovimiento {
     bool movimientoEnCurso(); // Devuelve si hay un movimiento en proceso.
     bool alcanzaFinalDeCarrera();    // Devuelve si se ha alcanzado un final de carrera.
     bool comprobarFin(FinalDeCarrera* sensor, const std::string& nombre);
-    void obtenerPosicion(float& x, float& y); // Retorna la posición actual.
+    std::pair<float,float> obtenerPosicion(); // Retorna la posición actual.
     void actualizarPosicion(float x, float y); // Actualiza la posición actual.
 
     // Enviar la poscion x y por fifowriter
@@ -91,6 +92,6 @@ struct PlanificadorDeMovimiento {
     void desactivarParadaDeEmergencia();
     bool esParadaDeEmergencia() const; // Método para verificar el estado de la parada de emergencia
 
-
-
+    // Envia informacion general por fifo
+    void enviarInformacionGeneralFifo();
 };

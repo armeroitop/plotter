@@ -52,6 +52,9 @@ void Gcode::interpretar(const std::string& instruccion) {
         servoBoli.bajar();
         std::cout << "[GCODE] Bajando el boli" << std::endl;
 
+    } else if (comando == "M100") { // peticion de informacion
+        planificador.enviarInformacionGeneralFifo();
+
     } else if (comando == "M999") {
         servoBoli.liberar();
         planificador.desactivarParadaDeEmergencia();

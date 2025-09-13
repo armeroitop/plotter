@@ -130,16 +130,19 @@ bool PlanificadorDeMovimiento::comprobarFin(FinalDeCarrera* sensor, const std::s
     if (sensor->esPulsado()) {
         ultimoFinDeCarreraActivado = nombre;
         activarParadaDeEmergencia();
-        // TODO: Quizás aquí estaría bien enviar por FIFOWRITER quien ha sido el sensor pulsado
+
         std::cout << "[PlanificadorDeMovimiento] Final de carrera: " << nombre << " activado. Parada de emergencia." << std::endl;
         FifoWriter::write("[Parada] Final de carrera: " + nombre );
+        // TODO: Si ha tocado un limite debemos actualizar el valor de dicho eje con el correspondiente al limite
+        
         return true;
     }
     return false;
 }
 
 
-void PlanificadorDeMovimiento::obtenerPosicion(float& x, float& y) {
+std::pair<float,float> PlanificadorDeMovimiento::obtenerPosicion() {
+    return {x_actual, y_actual};
 
 }
 
@@ -166,13 +169,32 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {
     paradaEmergencia = true;
+
+    FifoWriter::write("[Parada] Emergencia: true" );
     detener(); // Detener todos los motores inmediatamente
 }
 
 void PlanificadorDeMovimiento::desactivarParadaDeEmergencia() {
     paradaEmergencia = false;
+
+    FifoWriter::write("[Parada] Emergencia: false" );
 }
 
 bool PlanificadorDeMovimiento::esParadaDeEmergencia() const {
     return paradaEmergencia;
 }
+
+void PlanificadorDeMovimiento::enviarInformacionGeneralFifo() {
+    if (FifoWriter::isReady()) {
+        std::string info = "Informacion General: ";
+        info += "pos_actual: (" + std::to_string(x_actual) + ", " + std::to_string(y_actual) + "); ";
+        info += "vel_unit_max: " + std::to_string(velocidadUnitariaMax) + "; ";
+        info += "vel_ang_max: " + std::to_string(velocidadAngularMax) + "; ";
+        info += "parada_emergencia: " + std::string(paradaEmergencia ? "true" : "false") + "; ";
+        info += "u_final_carrera: " + ultimoFinDeCarreraActivado ;
+
+        FifoWriter::write(info);
+    } else {
+        std::cerr << "[PlanificadorDeMovimiento] No se pudo enviar la información general por FIFO" << std::endl;
+    }
+ }
