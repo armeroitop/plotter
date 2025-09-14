@@ -20,6 +20,8 @@ struct DRV8825Driver : MotorDriver {
 
   void rotar() override;
 
+  void reset() override;
+
   bool haCompletadoPasos() override;
 
   /**

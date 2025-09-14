@@ -30,18 +30,21 @@ int main() {
     std::signal(SIGINT, signalHandler);
     wiringPiSetup();
 
-    // Cargar parámetros desde el archivo JSON
-    Parametros parametros;
     try {
-        parametros = cargarParametros("src/include/parametros.json");
+        Parametros& parametros = Parametros::getInstance();
+        parametros.cargarParametrosJSON("src/include/parametros.json");
+
         std::cout << "[main] Parámetros cargados: "
-                  << "Velocidad Max: " << parametros.velocidadMax
-                  << ", Aceleración: " << parametros.aceleracion
-                  << ", Puerto Serie: " << parametros.puertoSerie << std::endl;
+            << "Velocidad Max: " << parametros.getVelocidadMax()
+            << ", Aceleración: " << parametros.getAceleracion()
+            << ", Ancho_mm: " << parametros.getAncho() << std::endl;
+
     } catch (const std::exception& e) {
         std::cerr << "[main] Error al cargar parámetros: " << e.what() << std::endl;
-        return 1; // Salir si no se pueden cargar los parámetros
+        return 1; // Salimos con código de error
     }
+
+
 
     // === Configuración ===
     ServoBoli servoBoli(config::pin_servoBoli);
@@ -71,9 +74,9 @@ int main() {
     executor.start();
 
     std::cout << "[main] Esperando comandos en /tmp/gcode_pipe (Ctrl+C para salir)\n";
-    
+
     FifoWriter::start("/tmp/plotter_out");
-    
+
     //FifoWriter writer("/tmp/plotter_out");
     //writer.start("/tmp/plotter_out");
 

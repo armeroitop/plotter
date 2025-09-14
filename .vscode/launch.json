@@ -7,7 +7,7 @@
             "name": "(gdb) Launch",  // Nombre de la configuración
             "type": "cppdbg",         // Usa el depurador de C++
             "request": "launch",
-            "program": "${workspaceFolder}/game",  // Ruta al ejecutable que compilas con Makefile
+            "program": "${workspaceFolder}/plotter",  // Ruta al ejecutable que compilas con Makefile
             "args": [],               // Argumentos que pasas al programa (si es necesario)
             "stopAtEntry": false,     // Cambia a true si quieres que el programa se detenga en main()
             "cwd": "${workspaceFolder}",  // Directorio de trabajo (normalmente el proyecto raíz)

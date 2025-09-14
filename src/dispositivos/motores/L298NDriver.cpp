@@ -63,7 +63,11 @@ void L298NDriver::rotar() {
         //printf("En rotar tiempodeInicio es %lld  y tiempo es %lld\n", tiempoDeInicio, obtenerTiempoActualMs());
     }
 
-    if (haCompletadoPasos()) {
+   
+}
+
+void L298NDriver::reset(){
+     if (haCompletadoPasos()) {
         // cuando dé el último paso cambiará "estaRotando" a false
         pasoActual = 0;
         estaRotando = false;
@@ -90,7 +94,10 @@ void L298NDriver::estableceSentidoGiro(int pasos) {
     }
 }
 
-bool L298NDriver::haCompletadoPasos() { return (pasoActual >= totalPasosSecuenciales); }
+bool L298NDriver::haCompletadoPasos() { 
+
+    return (pasoActual >= totalPasosSecuenciales); 
+}
 
 void L298NDriver::energizarBobinaActual() {
     // Secuencia tipo wave drive

@@ -54,13 +54,16 @@ void DRV8825Driver::rotar() {
         printf("En rotar %s tiempodeInicio es %lld  y tiempo es %lld\n",
                nombre.c_str(), tiempoDeInicio, obtenerTiempoActualMs());
     }
+}
 
-    if (haCompletadoPasos()) {
+void DRV8825Driver::reset(){
+     if (haCompletadoPasos()) {
         // cuando dé el último paso cambiará "estaRotando" a false
         pasoActual = 0;
         estaRotando = false;
     }
 }
+
 
 bool DRV8825Driver::haCompletadoPasos() {
     return (pasoActual >= totalPasos);

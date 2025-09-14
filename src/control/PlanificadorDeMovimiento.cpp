@@ -3,6 +3,7 @@
 #include "../dispositivos/motores/DRV8825Driver.hpp"
 #include "fifo/FifoWriter.hpp"
 #include <cmath>
+#include "../include/cargaParametros.hpp"
 
 PlanificadorDeMovimiento::PlanificadorDeMovimiento() { }
 
@@ -41,24 +42,51 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     int tiempoPasoY = 10000;
     calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
-    //printf("tiempoPasoX %i \n", tiempoPasoX);
-    //printf("tiempoPasoY %i \n", tiempoPasoY);
+    // Me guardo los signos de direccion de los motores
+    int sentidoMX = (pasosMotorX > 0) - (pasosMotorX < 0); // -1, 0 o 1
+    int sentidoMY = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
+
+    std::cout << "[PlanificadorDeMovimiento] : sentidoMX:  " << sentidoMX << ", sentidoMY: " << sentidoMY << std::endl;
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
 
+    // Guardamos la ultima posición en x_ultimo e y_ultimo
+    //guardarUltimaPosicion();
 
     // Mover los motores hasta llegar a la posicion. 
     arrancar();
 
-    while (movimientoEnCurso() && !alcanzaFinalDeCarrera() && !paradaEmergencia) {
+    bool finPorCarrera = false;
+
+    // Iniciamos el bucle donde el motor estará rotando
+    while (movimientoEnCurso() && !paradaEmergencia) {
+        if (alcanzaFinalDeCarrera()) {
+            finPorCarrera = true;
+            break;
+        }
         rotar();
         // TODO: Se debería actualizar la posición actual aquí
+        calcularPosicionActual(p_motorX->pasoActual, p_motorY->pasoActual, sentidoMX, sentidoMY);
+        resetMotores();
     }
 
+    // FIXME: Este metodo no me esta funcionando
+    //calcularPosicionActual(p_motorX->pasoActual, p_motorY->pasoActual);
+    std::cout << "[PlanificadorDeMovimiento] : x_ultimo:  " << x_ultimo << ", y_ultimo: " << y_ultimo << std::endl;
+
+
+    // FIXME: Cuando resuelvas lo de arriba no olvides descomentar el resetmotores
+    //resetMotores();
     detener();
 
-    actualizarPosicion(x, y);
+
+
+    if (finPorCarrera) {
+        actualizarPosicionPorPisarFinalDeCarrera();
+    } else {
+        actualizarPosicion(x, y);
+    }
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
 
@@ -75,6 +103,32 @@ void PlanificadorDeMovimiento::calcularPasos(float x, float y,
 
     pasosMotorX = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX - deltaY)));
     pasosMotorY = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX + deltaY)));
+}
+
+void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY) {
+    /*int sX = static_cast<int>(p_motorX->sentidoGiro);
+    int sY = static_cast<int>(p_motorY->sentidoGiro);*/
+
+    int pasosX_con_s = pasosMotorX * sentidoMX;
+    int pasosY_con_s = pasosMotorY * sentidoMY;
+
+    //FIXME: No consigo que de corrrectamente los deltaX y deltaY
+
+    if (!p_motorX->haCompletadoPasos() && !p_motorY->haCompletadoPasos() ) {
+        // Usamos la geometría H-Bot para calcular los x segun los pasos.
+        float deltaX = -(pasosX_con_s + pasosY_con_s) / (2.0f * Fisicas::resolucionPaso);
+        float deltaY = (pasosY_con_s - pasosX_con_s) / (2.0f * Fisicas::resolucionPaso);
+
+        //std::cout << " sX: " << sX << " sY: " << sY << std::endl;
+
+       // x_actual = x_ultimo + deltaX;
+       // y_actual = y_ultimo + deltaY;
+
+        x_ultimo = deltaX;
+        y_ultimo = deltaY;
+
+    }
+
 }
 
 void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
@@ -99,9 +153,19 @@ void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
     }
 }
 
+void PlanificadorDeMovimiento::guardarUltimaPosicion() {
+    x_ultimo = x_actual;
+    y_ultimo = y_actual;
+}
+
 void PlanificadorDeMovimiento::rotar() {
     p_motorX->rotar();
     p_motorY->rotar();
+}
+
+void PlanificadorDeMovimiento::resetMotores() {
+    p_motorX->reset();
+    p_motorY->reset();
 }
 
 void PlanificadorDeMovimiento::detener() {
@@ -119,30 +183,49 @@ bool PlanificadorDeMovimiento::movimientoEnCurso() {
 }
 
 bool PlanificadorDeMovimiento::alcanzaFinalDeCarrera() {
-    
+
     return comprobarFin(p_finXmin, "Xmin") ||
-           comprobarFin(p_finXmax, "Xmax") ||
-           comprobarFin(p_finYmin, "Ymin") ||
-           comprobarFin(p_finYmax, "Ymax");
+        comprobarFin(p_finXmax, "Xmax") ||
+        comprobarFin(p_finYmin, "Ymin") ||
+        comprobarFin(p_finYmax, "Ymax");
+}
+
+void PlanificadorDeMovimiento::actualizarPosicionPorPisarFinalDeCarrera() {
+    // TODO: Si ha tocado un limite debemos actualizar el valor de dicho eje con el correspondiente al limite
+
+    Parametros& parametros = Parametros::getInstance();
+    if (ultimoFinDeCarreraActivado == "Xmin") {
+        x_actual = -parametros.getAncho() / 2;
+        std::cout << "[PlanificadorDeMovimiento] : "
+            << "Ancho es:  " << parametros.getAncho()
+            << ", x_actual: " << x_actual << std::endl;
+    } else if (ultimoFinDeCarreraActivado == "Xmax") {
+        x_actual = parametros.getAncho() / 2;
+    } else if (ultimoFinDeCarreraActivado == "Ymin") {
+        y_actual = -parametros.getAlto() / 2;
+    } else if (ultimoFinDeCarreraActivado == "Ymax") {
+        y_actual = parametros.getAlto() / 2;
+    }
 }
 
 bool PlanificadorDeMovimiento::comprobarFin(FinalDeCarrera* sensor, const std::string& nombre) {
     if (sensor->esPulsado()) {
         ultimoFinDeCarreraActivado = nombre;
+
+        // TODO: Faltará meter el autohome y diferenciar este caso para la parada de emergencia
         activarParadaDeEmergencia();
 
         std::cout << "[PlanificadorDeMovimiento] Final de carrera: " << nombre << " activado. Parada de emergencia." << std::endl;
-        FifoWriter::write("[Parada] Final de carrera: " + nombre );
-        // TODO: Si ha tocado un limite debemos actualizar el valor de dicho eje con el correspondiente al limite
-        
+        FifoWriter::write("[Parada] Final de carrera: " + nombre);
+
         return true;
     }
     return false;
 }
 
 
-std::pair<float,float> PlanificadorDeMovimiento::obtenerPosicion() {
-    return {x_actual, y_actual};
+std::pair<float, float> PlanificadorDeMovimiento::obtenerPosicion() {
+    return { x_actual, y_actual };
 
 }
 
@@ -170,14 +253,14 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {
     paradaEmergencia = true;
 
-    FifoWriter::write("[Parada] Emergencia: true" );
+    FifoWriter::write("[Parada] Emergencia: true");
     detener(); // Detener todos los motores inmediatamente
 }
 
 void PlanificadorDeMovimiento::desactivarParadaDeEmergencia() {
     paradaEmergencia = false;
 
-    FifoWriter::write("[Parada] Emergencia: false" );
+    FifoWriter::write("[Parada] Emergencia: false");
 }
 
 bool PlanificadorDeMovimiento::esParadaDeEmergencia() const {
@@ -191,10 +274,10 @@ void PlanificadorDeMovimiento::enviarInformacionGeneralFifo() {
         info += "vel_unit_max: " + std::to_string(velocidadUnitariaMax) + "; ";
         info += "vel_ang_max: " + std::to_string(velocidadAngularMax) + "; ";
         info += "parada_emergencia: " + std::string(paradaEmergencia ? "true" : "false") + "; ";
-        info += "u_final_carrera: " + ultimoFinDeCarreraActivado ;
+        info += "u_final_carrera: " + ultimoFinDeCarreraActivado;
 
         FifoWriter::write(info);
     } else {
         std::cerr << "[PlanificadorDeMovimiento] No se pudo enviar la información general por FIFO" << std::endl;
     }
- }
+}

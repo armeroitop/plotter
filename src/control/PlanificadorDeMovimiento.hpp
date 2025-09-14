@@ -20,6 +20,7 @@ struct PlanificadorDeMovimiento {
     std::string ultimoFinDeCarreraActivado;
     
     float x_actual = 0, y_actual = 0;
+    float x_ultimo = 0, y_ultimo = 0;
 
     float velocidadUnitariaMax = 0;
     float velocidadX = 0;
@@ -59,15 +60,20 @@ struct PlanificadorDeMovimiento {
     void calcularTiemposDePaso(const float deltaX, const float deltaY,
         int& tiempoPasoX,
         int& tiempoPasoY);
+    
+    void guardarUltimaPosicion();
 
+    void calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY);
 
     void rotar();    // Realiza un paso en la trayectoria.
+    void resetMotores();
     void detener();  // Detiene todos los motores.
     void pausar();   // Pausa el movimiento actual.
     void arrancar(); // Reanuda después de una pausa.
 
     bool movimientoEnCurso(); // Devuelve si hay un movimiento en proceso.
     bool alcanzaFinalDeCarrera();    // Devuelve si se ha alcanzado un final de carrera.
+    void actualizarPosicionPorPisarFinalDeCarrera();
     bool comprobarFin(FinalDeCarrera* sensor, const std::string& nombre);
     std::pair<float,float> obtenerPosicion(); // Retorna la posición actual.
     void actualizarPosicion(float x, float y); // Actualiza la posición actual.

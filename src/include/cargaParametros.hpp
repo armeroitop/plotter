@@ -1,39 +1,35 @@
-#include <iostream>
-#include <fstream>
+#pragma once
 
-// Con esto limpiamos las advertencias de nlohmann/json cuando compilamos con -Wall
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wextra"
-#include <nlohmann/json.hpp>
-#pragma GCC diagnostic pop
+#include <string>
 
-using json = nlohmann::json;
+class Parametros {
+    private:
 
-struct Parametros {
+    // Propiedades de configuración
     int velocidadMax;
     int aceleracion;
     std::string puertoSerie;
     int ancho_mm;
     int alto_mm;
+
+    Parametros();
+
+    public:
+
+    // Evitamos copias del Singleton
+    Parametros(const Parametros&) = delete;
+    Parametros& operator=(const Parametros&) = delete;
+
+    // Acceso al único objeto
+    static Parametros& getInstance();
+
+    // Métodos de carga
+    void cargarParametrosJSON(const std::string& ruta);
+
+    // Getters
+    int getVelocidadMax() const { return velocidadMax; }
+    int getAceleracion() const { return aceleracion; }
+    std::string getPuertoSerie() const { return puertoSerie; }
+    int getAncho() const { return ancho_mm; }
+    int getAlto() const { return alto_mm; }
 };
-
-Parametros cargarParametros(const std::string& ruta) {
-    std::ifstream f(ruta);
-    if (!f.is_open()) {
-        throw std::runtime_error("No se pudo abrir el archivo de parametros: " + ruta);
-    }
-
-    json j;
-    f >> j;
-
-    Parametros parametro;
-    parametro.velocidadMax = j.value("velocidadMax", 100);  // valor por defecto si no existe
-    parametro.aceleracion  = j.value("aceleracion", 100);
-    parametro.puertoSerie  = j.value("puertoSerie", "/dev/ttyUSB0");
-
-    parametro.ancho_mm = j.value("ancho_mm", 200); // valor por defecto si no existe
-    parametro.alto_mm  = j.value("alto_mm", 200);
-
-    return parametro;
-}
