@@ -52,7 +52,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
 
     // Guardamos la ultima posición en x_ultimo e y_ultimo
-    //guardarUltimaPosicion();
+    guardarUltimaPosicion();
 
     // Mover los motores hasta llegar a la posicion. 
     arrancar();
@@ -66,7 +66,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
             break;
         }
         rotar();
-        // TODO: Se debería actualizar la posición actual aquí
+        // Se actualiza las coordenadas de posición actual 
         calcularPosicionActual(p_motorX->pasoActual, p_motorY->pasoActual, sentidoMX, sentidoMY);
         resetMotores();
     }
@@ -75,17 +75,13 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     //calcularPosicionActual(p_motorX->pasoActual, p_motorY->pasoActual);
     std::cout << "[PlanificadorDeMovimiento] : x_ultimo:  " << x_ultimo << ", y_ultimo: " << y_ultimo << std::endl;
 
-
-    // FIXME: Cuando resuelvas lo de arriba no olvides descomentar el resetmotores
-    //resetMotores();
     detener();
-
-
 
     if (finPorCarrera) {
         actualizarPosicionPorPisarFinalDeCarrera();
     } else {
-        actualizarPosicion(x, y);
+        // ya venimos con las coordenadas actualizadas
+        //actualizarPosicion(x, y);
     }
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
@@ -106,29 +102,17 @@ void PlanificadorDeMovimiento::calcularPasos(float x, float y,
 }
 
 void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY) {
-    /*int sX = static_cast<int>(p_motorX->sentidoGiro);
-    int sY = static_cast<int>(p_motorY->sentidoGiro);*/
 
     int pasosX_con_s = pasosMotorX * sentidoMX;
     int pasosY_con_s = pasosMotorY * sentidoMY;
 
-    //FIXME: No consigo que de corrrectamente los deltaX y deltaY
+    // Usamos la geometría H-Bot para calcular los x segun los pasos.
+    float deltaX = -(pasosX_con_s + pasosY_con_s) / (2.0f * Fisicas::resolucionPaso);
+    float deltaY = (pasosY_con_s - pasosX_con_s) / (2.0f * Fisicas::resolucionPaso);
 
-    if (!p_motorX->haCompletadoPasos() && !p_motorY->haCompletadoPasos() ) {
-        // Usamos la geometría H-Bot para calcular los x segun los pasos.
-        float deltaX = -(pasosX_con_s + pasosY_con_s) / (2.0f * Fisicas::resolucionPaso);
-        float deltaY = (pasosY_con_s - pasosX_con_s) / (2.0f * Fisicas::resolucionPaso);
-
-        //std::cout << " sX: " << sX << " sY: " << sY << std::endl;
-
-       // x_actual = x_ultimo + deltaX;
-       // y_actual = y_ultimo + deltaY;
-
-        x_ultimo = deltaX;
-        y_ultimo = deltaY;
-
-    }
-
+    
+    x_actual = x_ultimo + deltaX;
+    y_actual = y_ultimo + deltaY;
 }
 
 void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
@@ -226,7 +210,6 @@ bool PlanificadorDeMovimiento::comprobarFin(FinalDeCarrera* sensor, const std::s
 
 std::pair<float, float> PlanificadorDeMovimiento::obtenerPosicion() {
     return { x_actual, y_actual };
-
 }
 
 void PlanificadorDeMovimiento::actualizarPosicion(float x, float y) {
