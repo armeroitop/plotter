@@ -55,8 +55,11 @@ void DRV8825Driver::rotar() {
                nombre.c_str(), tiempoDeInicio, obtenerTiempoActualMs());
     }
 }
-
-void DRV8825Driver::reset(){
+/**
+ * @brief Revisa si terminó los pasos y pone estaRotando = false.
+ * 
+ */
+void DRV8825Driver::detenerSiCompletado(){
      if (haCompletadoPasos()) {
         // cuando dé el último paso cambiará "estaRotando" a false
         //pasoActual = 0;

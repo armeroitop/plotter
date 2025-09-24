@@ -20,7 +20,7 @@ struct L298NDriver : MotorDriver {
 
     void rotar() override;
 
-    void reset() override;
+    void detenerSiCompletado() override;
 
     bool haCompletadoPasos() override;
 

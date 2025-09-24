@@ -24,6 +24,30 @@ void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
     p_finYmax = &finYmax;
 }
 
+void PlanificadorDeMovimiento::acelerarTiemposDePaso(int& tiempoPasoX, int& tiempoPasoY) {
+    // --- Aceleración / frenado ---
+    int pasosRestantes = calcularPasosRestantes(); // vector total
+    int pasosParada = (velocidadAngularMax * velocidadAngularMax) / (2 * aceleracion); // pasos
+
+    if (pasosRestantes > pasosParada) {
+        // Acelera hasta 1.0
+        velocidadCoef += aceleracion * dt;
+        if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
+    } else {
+        // Frenar
+        velocidadCoef -= aceleracion * dt;
+        if (velocidadCoef < 0.1f) velocidadCoef = 0.1f; // evita 0
+    }
+
+    // --- Aplica coeficiente a los intervalos ---
+    int tiempoPasoXacelerado = static_cast<int>(tiempoPasoX / velocidadCoef);
+    int tiempoPasoYacelerado = static_cast<int>(tiempoPasoY / velocidadCoef);
+
+    p_motorX->setTiempoPaso(tiempoPasoXacelerado);
+    p_motorY->setTiempoPaso(tiempoPasoYacelerado);
+
+}
+
 void PlanificadorDeMovimiento::moverA(float x, float y) {
     printf("PlanificadorDeMovimiento::moverA x: %f, y: %f \n", x, y);
 
@@ -42,7 +66,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     int tiempoPasoY = 10000;
     calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
-    // Me guardo los signos de direccion de los motores
+    // Me guardo los signos de direccion de los motores (TODO sería bueno usar p_motorX->sentidoGiro y quitar esto de aquí)
     int sentidoMX = (pasosMotorX > 0) - (pasosMotorX < 0); // -1, 0 o 1
     int sentidoMY = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
 
@@ -50,6 +74,9 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
+
+    velocidadCoef = 0.0f; // empieza desde 0 (parado)
+    coefStep = 0.0f;
 
     // Guardamos la ultima posición en x_ultimo e y_ultimo
     guardarUltimaPosicion();
@@ -65,10 +92,13 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
             finPorCarrera = true;
             break;
         }
+
+        // TODO aquí se ha de actualizar el coeficiente de aceleracion
+
         rotar();
         // Se actualiza las coordenadas de posición actual 
         calcularPosicionActual(p_motorX->pasoActual, p_motorY->pasoActual, sentidoMX, sentidoMY);
-        resetMotores();
+        detenerSiCompletado();
     }
 
     // FIXME: Este metodo no me esta funcionando
@@ -101,7 +131,8 @@ void PlanificadorDeMovimiento::calcularPasos(float x, float y,
     pasosMotorY = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX + deltaY)));
 }
 
-void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY) {
+void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasosMotorY,
+                                                      int sentidoMX, int sentidoMY) {
 
     int pasosX_con_s = pasosMotorX * sentidoMX;
     int pasosY_con_s = pasosMotorY * sentidoMY;
@@ -110,7 +141,7 @@ void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasos
     float deltaX = -(pasosX_con_s + pasosY_con_s) / (2.0f * Fisicas::resolucionPaso);
     float deltaY = (pasosY_con_s - pasosX_con_s) / (2.0f * Fisicas::resolucionPaso);
 
-    
+
     x_actual = x_ultimo + deltaX;
     y_actual = y_ultimo + deltaY;
 }
@@ -137,6 +168,12 @@ void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
     }
 }
 
+int PlanificadorDeMovimiento::calcularPasosRestantes() {
+    int pasosX = p_motorX->totalPasos - p_motorX->pasoActual;
+    int pasosX = p_motorY->totalPasos - p_motorY->pasoActual;
+    return std::max(pasosX, pasosY); // para rampas escaladas
+}
+
 void PlanificadorDeMovimiento::guardarUltimaPosicion() {
     x_ultimo = x_actual;
     y_ultimo = y_actual;
@@ -147,9 +184,9 @@ void PlanificadorDeMovimiento::rotar() {
     p_motorY->rotar();
 }
 
-void PlanificadorDeMovimiento::resetMotores() {
-    p_motorX->reset();
-    p_motorY->reset();
+void PlanificadorDeMovimiento::detenerSiCompletado() {
+    p_motorX->detenerSiCompletado();
+    p_motorY->detenerSiCompletado();
 }
 
 void PlanificadorDeMovimiento::detener() {

@@ -18,16 +18,23 @@ struct PlanificadorDeMovimiento {
     FinalDeCarrera* p_finYmax = nullptr;
 
     std::string ultimoFinDeCarreraActivado;
-    
+
     float x_actual = 0, y_actual = 0;
     float x_ultimo = 0, y_ultimo = 0;
 
     float velocidadUnitariaMax = 0;
     float velocidadX = 0;
     float velocidadY = 0;
+    float aceleracion = 0;
+
+    float velocidadCoef = 0.0f; // empieza desde 0 (parado)
+    float coefStep = 0.0f;
+
 
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
     float velocidadAngularMax = 0.0001f; // pasos/microisegundos
+
+    int  velocidadPasosPorSegundo = 100// salen a 100 pasos/segundo
 
     bool paradaEmergencia = false;
 
@@ -40,6 +47,8 @@ struct PlanificadorDeMovimiento {
 
     void setVelocidadMaxima(float velocidad);
     void setAceleracionMaxima(float aceleracion);
+
+    void acelerarTiemposDePaso(int& tiempoPasoX, int& tiempoPasoY);
 
     // Define cuántos pasos por unidad (e.g., mm o grados).
     void setResolucionPaso(float pasosPorUnidad);
@@ -60,13 +69,15 @@ struct PlanificadorDeMovimiento {
     void calcularTiemposDePaso(const float deltaX, const float deltaY,
         int& tiempoPasoX,
         int& tiempoPasoY);
-    
+
+    int calcularPasosRestantes();
+
     void guardarUltimaPosicion();
 
     void calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY);
 
     void rotar();    // Realiza un paso en la trayectoria.
-    void resetMotores();
+    void detenerSiCompletado();
     void detener();  // Detiene todos los motores.
     void pausar();   // Pausa el movimiento actual.
     void arrancar(); // Reanuda después de una pausa.
@@ -75,14 +86,14 @@ struct PlanificadorDeMovimiento {
     bool alcanzaFinalDeCarrera();    // Devuelve si se ha alcanzado un final de carrera.
     void actualizarPosicionPorPisarFinalDeCarrera();
     bool comprobarFin(FinalDeCarrera* sensor, const std::string& nombre);
-    std::pair<float,float> obtenerPosicion(); // Retorna la posición actual.
+    std::pair<float, float> obtenerPosicion(); // Retorna la posición actual.
     void actualizarPosicion(float x, float y); // Actualiza la posición actual.
 
     // Enviar la poscion x y por fifowriter
     void enviarPosicionFifo();
 
     void configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY);
-     
+
 
     // Permite suavizar el arranque y la detención utilizando aceleración y
     // deceleración.

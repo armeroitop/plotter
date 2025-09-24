@@ -71,7 +71,7 @@ struct MotorDriver : Fisicas {
 
   virtual void rotar() = 0;
 
-  virtual void reset() = 0;
+  virtual void detenerSiCompletado() = 0;
   
   virtual void energizarBobinaActual() = 0;
 

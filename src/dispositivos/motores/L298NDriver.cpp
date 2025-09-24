@@ -66,7 +66,7 @@ void L298NDriver::rotar() {
    
 }
 
-void L298NDriver::reset(){
+void L298NDriver::detenerSiCompletado(){
      if (haCompletadoPasos()) {
         // cuando dé el último paso cambiará "estaRotando" a false
         pasoActual = 0;
