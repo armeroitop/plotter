@@ -38,7 +38,7 @@ struct MotorDriver : Fisicas {
   } sentidoGiro;
 
   /*Tiempo entre paso y paso medido en microsegundos*/
-  int tiempoPaso = 1;
+  int64_t tiempoPaso = 1;
 
   explicit MotorDriver() : Fisicas() {}
 

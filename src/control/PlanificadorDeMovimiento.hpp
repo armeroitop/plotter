@@ -3,6 +3,7 @@
 //#include "../dispositivos/interruptores/FinalDeCarrera.hpp"
 #include <string>
 #include <utility> //std::pair
+#include <chrono>
 
 // Forward declarations
 class MotorDriver;
@@ -25,16 +26,18 @@ struct PlanificadorDeMovimiento {
     float velocidadUnitariaMax = 0;
     float velocidadX = 0;
     float velocidadY = 0;
-    float aceleracion = 0;
+    int aceleracion = 250; // pasos por segundo al cuadrado. Con (a=500) esto aceleraremos a tope en 10 pasos
 
     float velocidadCoef = 0.0f; // empieza desde 0 (parado)
     float coefStep = 0.0f;
+    int pasosParada; // pasos que dará acelerando
+    std::chrono::steady_clock::time_point t_anterior;
 
 
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
     float velocidadAngularMax = 0.0001f; // pasos/microisegundos
 
-    int  velocidadPasosPorSegundo = 100// salen a 100 pasos/segundo
+    int  velocidadPasosPorSegundo = 100; // salen a 100 pasos/segundo
 
     bool paradaEmergencia = false;
 
@@ -48,7 +51,7 @@ struct PlanificadorDeMovimiento {
     void setVelocidadMaxima(float velocidad);
     void setAceleracionMaxima(float aceleracion);
 
-    void acelerarTiemposDePaso(int& tiempoPasoX, int& tiempoPasoY);
+    void acelerarTiemposDePaso(int64_t& tiempoPasoX, int64_t& tiempoPasoY);
 
     // Define cuántos pasos por unidad (e.g., mm o grados).
     void setResolucionPaso(float pasosPorUnidad);
@@ -67,8 +70,8 @@ struct PlanificadorDeMovimiento {
                         int& pasosMotorY);
 
     void calcularTiemposDePaso(const float deltaX, const float deltaY,
-        int& tiempoPasoX,
-        int& tiempoPasoY);
+        int64_t& tiempoPasoX,
+        int64_t& tiempoPasoY);
 
     int calcularPasosRestantes();
 
@@ -92,7 +95,7 @@ struct PlanificadorDeMovimiento {
     // Enviar la poscion x y por fifowriter
     void enviarPosicionFifo();
 
-    void configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY);
+    void configurarMotores(int pasosMotorX, int pasosMotorY, int64_t tiempoPasoX, int64_t tiempoPasoY);
 
 
     // Permite suavizar el arranque y la detención utilizando aceleración y

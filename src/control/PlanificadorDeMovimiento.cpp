@@ -5,7 +5,11 @@
 #include <cmath>
 #include "../include/cargaParametros.hpp"
 
-PlanificadorDeMovimiento::PlanificadorDeMovimiento() { }
+PlanificadorDeMovimiento::PlanificadorDeMovimiento() { 
+   pasosParada = (velocidadPasosPorSegundo * velocidadPasosPorSegundo) / (2 * aceleracion);
+
+   t_anterior = std::chrono::steady_clock::now(); 
+}
 
 void PlanificadorDeMovimiento::setMotores(MotorDriver& motorX,
                                           MotorDriver& motorY) {
@@ -24,28 +28,31 @@ void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
     p_finYmax = &finYmax;
 }
 
-void PlanificadorDeMovimiento::acelerarTiemposDePaso(int& tiempoPasoX, int& tiempoPasoY) {
+void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64_t& tiempoPasoY) {
+
     // --- Aceleración / frenado ---
     int pasosRestantes = calcularPasosRestantes(); // vector total
-    int pasosParada = (velocidadAngularMax * velocidadAngularMax) / (2 * aceleracion); // pasos
+    int pasosTotales =  std::max(p_motorX->totalPasos, p_motorY->totalPasos);
+    int pasosRecorridos = pasosTotales - pasosRestantes;
+
 
     if (pasosRestantes > pasosParada) {
-        // Acelera hasta 1.0
-        velocidadCoef += aceleracion * dt;
+        // --- Aceleración ---
+        velocidadCoef = sqrt(2.0f * aceleracion * pasosRecorridos) / velocidadPasosPorSegundo;
         if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
     } else {
-        // Frenar
-        velocidadCoef -= aceleracion * dt;
-        if (velocidadCoef < 0.1f) velocidadCoef = 0.1f; // evita 0
+         // --- Deceleración ---
+        velocidadCoef = sqrt(2.0f * aceleracion * pasosRestantes) / velocidadPasosPorSegundo;
+        if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
+        if (velocidadCoef < 0.1f) velocidadCoef = 0.3f; // evita 0
     }
 
     // --- Aplica coeficiente a los intervalos ---
-    int tiempoPasoXacelerado = static_cast<int>(tiempoPasoX / velocidadCoef);
-    int tiempoPasoYacelerado = static_cast<int>(tiempoPasoY / velocidadCoef);
+    int64_t tiempoPasoXacelerado = static_cast<int64_t>(tiempoPasoX / velocidadCoef);
+    int64_t tiempoPasoYacelerado = static_cast<int64_t>(tiempoPasoY / velocidadCoef);
 
-    p_motorX->setTiempoPaso(tiempoPasoXacelerado);
-    p_motorY->setTiempoPaso(tiempoPasoYacelerado);
-
+    p_motorX->ponTiempoDePaso(tiempoPasoXacelerado);
+    p_motorY->ponTiempoDePaso(tiempoPasoYacelerado);
 }
 
 void PlanificadorDeMovimiento::moverA(float x, float y) {
@@ -62,8 +69,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     calcularPasos(x, y, pasosMotorX, pasosMotorY);
 
     // Calcular los tiempos de paso para cada motor en función de la velocidad maxima
-    int tiempoPasoX = 10000;
-    int tiempoPasoY = 10000;
+    int64_t tiempoPasoX = 10000;
+    int64_t tiempoPasoY = 10000;
     calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
     // Me guardo los signos de direccion de los motores (TODO sería bueno usar p_motorX->sentidoGiro y quitar esto de aquí)
@@ -94,6 +101,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
         }
 
         // TODO aquí se ha de actualizar el coeficiente de aceleracion
+        acelerarTiemposDePaso(tiempoPasoX, tiempoPasoY);
 
         rotar();
         // Se actualiza las coordenadas de posición actual 
@@ -148,29 +156,29 @@ void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasos
 
 void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
                                                      const float absPasosMotorY,
-                                                     int& tiempoPasoX,
-                                                     int& tiempoPasoY) {
+                                                     int64_t& tiempoPasoX,
+                                                     int64_t& tiempoPasoY) {
 
     if (absPasosMotorX != 0 && absPasosMotorY != 0) {
         float relacionXY = static_cast<float>(absPasosMotorX) / absPasosMotorY;
 
         if (relacionXY <= 1) {
-            tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
-            tiempoPasoX = static_cast<int>(tiempoPasoY / relacionXY);
+            tiempoPasoY = static_cast<int64_t>((1.0f / velocidadPasosPorSegundo ) * 1000000);
+            tiempoPasoX = static_cast<int64_t>( static_cast<float>(tiempoPasoY) / relacionXY);
         } else {
-            tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
-            tiempoPasoY = static_cast<int>(tiempoPasoX * relacionXY);
+            tiempoPasoX = static_cast<int64_t>((1.0f / velocidadPasosPorSegundo ) * 1000000);
+            tiempoPasoY = static_cast<int64_t>( static_cast<float>(tiempoPasoX) * relacionXY);
         }
     } else if (absPasosMotorX == 0) {
-        tiempoPasoY = static_cast<int>(1 / velocidadAngularMax);
+        tiempoPasoY = static_cast<int64_t>((1.0f / velocidadPasosPorSegundo ) * 1000000);
     } else if (absPasosMotorY == 0) {
-        tiempoPasoX = static_cast<int>(1 / velocidadAngularMax);
+        tiempoPasoX = static_cast<int64_t>((1.0f / velocidadPasosPorSegundo ) * 1000000);
     }
 }
 
 int PlanificadorDeMovimiento::calcularPasosRestantes() {
     int pasosX = p_motorX->totalPasos - p_motorX->pasoActual;
-    int pasosX = p_motorY->totalPasos - p_motorY->pasoActual;
+    int pasosY = p_motorY->totalPasos - p_motorY->pasoActual;
     return std::max(pasosX, pasosY); // para rampas escaladas
 }
 
@@ -262,7 +270,7 @@ void PlanificadorDeMovimiento::enviarPosicionFifo() {
     }
 }
 
-void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotorY, int tiempoPasoX, int tiempoPasoY) {
+void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotorY, int64_t tiempoPasoX, int64_t tiempoPasoY) {
     p_motorX->rotarPasos(pasosMotorX);
     p_motorY->rotarPasos(pasosMotorY);
     p_motorX->ponTiempoDePaso(tiempoPasoX);
