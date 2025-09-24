@@ -1,6 +1,6 @@
 {
-    "velocidadMax": 666,
-    "aceleracion": 1000,
+    "velocidadMax": 200,
+    "aceleracion": 2000,
     "puertoSerie": "/dev/ttyUSB0",
     "ancho_mm": 240,
     "alto_mm": 260

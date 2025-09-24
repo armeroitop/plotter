@@ -8,6 +8,7 @@
 // Forward declarations
 class MotorDriver;
 class FinalDeCarrera;
+class Parametros;
 
 struct PlanificadorDeMovimiento {
     MotorDriver* p_motorX = nullptr;
@@ -18,6 +19,8 @@ struct PlanificadorDeMovimiento {
     FinalDeCarrera* p_finYmin = nullptr;
     FinalDeCarrera* p_finYmax = nullptr;
 
+    Parametros& parametros;
+
     std::string ultimoFinDeCarreraActivado;
 
     float x_actual = 0, y_actual = 0;
@@ -26,12 +29,17 @@ struct PlanificadorDeMovimiento {
     float velocidadUnitariaMax = 0;
     float velocidadX = 0;
     float velocidadY = 0;
-    int aceleracion = 250; // pasos por segundo al cuadrado. Con (a=500) esto aceleraremos a tope en 10 pasos
+    int aceleracion = 500; // pasos por segundo al cuadrado. Con (a=500) esto aceleraremos a tope en 10 pasos
 
     float velocidadCoef = 0.0f; // empieza desde 0 (parado)
     float coefStep = 0.0f;
     int pasosParada; // pasos que dará acelerando
     std::chrono::steady_clock::time_point t_anterior;
+
+    int sentidoMX_actual = 0;
+    int sentidoMY_actual = 0;
+    int sentidoMX_ultimo = 0;
+    int sentidoMY_ultimo = 0;
 
 
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
@@ -96,6 +104,8 @@ struct PlanificadorDeMovimiento {
     void enviarPosicionFifo();
 
     void configurarMotores(int pasosMotorX, int pasosMotorY, int64_t tiempoPasoX, int64_t tiempoPasoY);
+
+    bool esCambioDeDireccion();
 
 
     // Permite suavizar el arranque y la detención utilizando aceleración y
