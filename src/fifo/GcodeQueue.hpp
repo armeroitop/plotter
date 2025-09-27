@@ -10,7 +10,9 @@ public:
     //void push(const std::string& command);
     void push_back(const std::string& command);
     void push_front(const std::string& command);
-    std::string pop();
+    std::string pop();   // bloquea y saca
+    std::string peek();  // mira el siguiente sin sacarlo
+    //std::vector<std::string> tryPeekN(size_t n);
     bool empty() const;
 
 private:

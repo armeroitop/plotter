@@ -70,7 +70,7 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
     p_motorY->ponTiempoDePaso(tiempoPasoYacelerado);
 }
 
-void PlanificadorDeMovimiento::moverA(float x, float y) {
+void PlanificadorDeMovimiento::moverA(float x, float y,const std::optional<std::string>& siguienteG1) {
     printf("PlanificadorDeMovimiento::moverA x: %f, y: %f \n", x, y);
 
     if (paradaEmergencia) {
@@ -148,8 +148,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y) {
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
 
-void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY) {
-    moverA(x_actual + deltaX, y_actual + deltaY);
+void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY, const std::optional<std::string>& siguienteG1) {
+    moverA(x_actual + deltaX, y_actual + deltaY, siguienteG1);
 }
 
 void PlanificadorDeMovimiento::calcularPasos(float x, float y,

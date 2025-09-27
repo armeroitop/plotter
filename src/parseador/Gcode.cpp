@@ -7,10 +7,10 @@ Gcode::Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli)
 
 /**
  * @brief  Interpreta una instrucción G-code y ejecuta la acción correspondiente.
- * 
- * @param instruccion 
+ *
+ * @param instruccion
  */
-void Gcode::interpretar(const std::string& instruccion) {
+void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>& bufferMovimientos) {
     std::istringstream entrada(instruccion);
     std::string comando;
     entrada >> comando;
@@ -28,13 +28,23 @@ void Gcode::interpretar(const std::string& instruccion) {
             }
         }
 
+        std::optional<std::string> siguienteG1;
+        if (bufferMovimientos.size() > 1) {
+            siguienteG1 = bufferMovimientos[1]; // acceso por índice
+        }
+
         if (modoRelativo) {
             printf("anificador.moverRelativo X: %i, Y: %i  \n", x, y);
-            planificador.moverRelativo(x, y);
+            planificador.moverRelativo(x, y, siguienteG1);
+            //planificador.moverRelativo(current.first, current.second, next);
         } else {
             printf("planificador.moverA X: %i, Y: %i  \n", x, y);
-            planificador.moverA(x, y);
+            planificador.moverA(x, y, siguienteG1);
+            //planificador.moverA(current.first, current.second, next);
         }
+
+        // Eliminamos el comando ya ejecutado
+        bufferMovimientos.clear();
 
     } else if (comando == "G90") {
         modoRelativo = false;
@@ -67,7 +77,7 @@ void Gcode::interpretar(const std::string& instruccion) {
 
     } else {
         std::cerr << "Comando no reconocido: " << comando << std::endl;
-        
+
     }
 }
 

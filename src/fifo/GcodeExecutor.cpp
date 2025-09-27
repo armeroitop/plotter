@@ -35,11 +35,22 @@ void GcodeExecutor::stop() {
 void GcodeExecutor::executionLoop() {
     while (running) {
         std::string linea = queue.pop(); // Espera si la cola está vacía
-        std::cout << "[Executor] Ejecutando: " << linea << std::endl;        
+        std::cout << "[Executor] Ejecutando: " << linea << std::endl;
+
+        if (linea.rfind("G1", 0) == 0) {
+            bufferMovimientos.push_back(linea);
+
+            if (!queue.empty()) {
+                std::string siguiente = queue.peek();
+                if (siguiente.rfind("G1", 0) == 0) {
+                    bufferMovimientos.push_back(siguiente);
+                }
+            }
+        }
 
         if (FifoWriter::isReady()) {
             FifoWriter::write("[Executor] Ejecutando: " + linea);
-            gcode.interpretar(linea);
+            gcode.interpretar(linea, bufferMovimientos);
             FifoWriter::write("[Executor] Linea interpretada: " + linea);
         } else {
             std::cerr << "[Executor] No se ha interpretado nada" << std::endl;

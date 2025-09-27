@@ -4,6 +4,8 @@
 #include <string>
 #include <utility> //std::pair
 #include <chrono>
+#include <deque>
+#include <optional>
 
 // Forward declarations
 class MotorDriver;
@@ -65,10 +67,10 @@ struct PlanificadorDeMovimiento {
     void setResolucionPaso(float pasosPorUnidad);
 
     // Calcula trayectorias y activa los motores.
-    void moverA(float x, float y);
+    void moverA(float x, float y, const std::optional<std::string>& siguienteG1);
 
     // Mueve de forma relativa a la posición actual.
-    void moverRelativo(float deltaX, float deltaY);
+    void moverRelativo(float deltaX, float deltaY, const std::optional<std::string>& siguienteG1);
 
     void moverMotorX(int pasos, bool direccion); // Avanza pasos en X.
     void moverMotorY(int pasos, bool direccion); // Avanza pasos en Y.

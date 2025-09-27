@@ -5,6 +5,8 @@
 
 #include <thread>
 #include <atomic>
+#include <deque>
+#include <string>
 
 class GcodeExecutor {
     public:
@@ -16,6 +18,7 @@ class GcodeExecutor {
 
     private:
     void executionLoop();
+    std::deque<std::string> bufferMovimientos; // solo comandos G1
 
     GcodeQueue& queue;
     Gcode& gcode;
