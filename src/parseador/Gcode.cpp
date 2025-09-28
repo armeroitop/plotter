@@ -28,9 +28,10 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
             }
         }
 
-        std::optional<std::string> siguienteG1;
+        std::optional<std::pair<float, float>> siguienteG1;
         if (bufferMovimientos.size() > 1) {
-            siguienteG1 = bufferMovimientos[1]; // acceso por índice
+             // acceso por índice
+             siguienteG1 = extraerCoordenadas( bufferMovimientos[1]);
         }
 
         if (modoRelativo) {
@@ -79,5 +80,24 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
         std::cerr << "Comando no reconocido: " << comando << std::endl;
 
     }
+}
+
+
+std::pair<float, float> Gcode::extraerCoordenadas(const std::string& comandoG1) {
+    std::pair<float, float> coordenadas;
+    std::istringstream entrada(comandoG1);
+    std::string comando;
+    entrada >> comando; // Leer "G1"
+    
+    char eje;
+    while (entrada >> eje) {
+        if (eje == 'X') {
+            entrada >> coordenadas.first;
+        } else if (eje == 'Y') {
+            entrada >> coordenadas.second;
+        }
+    }
+    
+    return coordenadas;
 }
 

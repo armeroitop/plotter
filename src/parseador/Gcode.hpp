@@ -10,6 +10,9 @@
 struct Gcode {
     Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli);
     void interpretar(const std::string& instruccion, std::deque<std::string>& bufferMovimientos);
+    
+    // Método para extraer coordenadas X e Y de un comando G1
+    std::pair<float, float> extraerCoordenadas(const std::string& comandoG1);
 
     bool modoRelativo = false; // Modo de coordenadas relativas
 

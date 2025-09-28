@@ -42,6 +42,12 @@ struct PlanificadorDeMovimiento {
     int sentidoMY_actual = 0;
     int sentidoMX_ultimo = 0;
     int sentidoMY_ultimo = 0;
+    int sentidoMX_siguiente = 0;
+    int sentidoMY_siguiente = 0;
+
+    bool debeFrenar = true;
+
+
 
 
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
@@ -67,17 +73,43 @@ struct PlanificadorDeMovimiento {
     void setResolucionPaso(float pasosPorUnidad);
 
     // Calcula trayectorias y activa los motores.
-    void moverA(float x, float y, const std::optional<std::string>& siguienteG1);
+    void moverA(float x, float y, const std::optional<std::pair<float, float>>& siguienteG1);
 
     // Mueve de forma relativa a la posición actual.
-    void moverRelativo(float deltaX, float deltaY, const std::optional<std::string>& siguienteG1);
+    void moverRelativo(float deltaX, float deltaY, const std::optional<std::pair<float, float>>& siguienteG1);
 
     void moverMotorX(int pasos, bool direccion); // Avanza pasos en X.
     void moverMotorY(int pasos, bool direccion); // Avanza pasos en Y.
 
+    /**
+     * @brief Calcula la cantidad de pasos que debe dar desde la posición
+     * actual a los incrementos de posición en los ejes x e y
+     * 
+     * @param deltaX 
+     * @param deltaY 
+     * @param pasosMotorX 
+     * @param pasosMotorY 
+     */
     void calcularPasos(float deltaX, float deltaY,
                         int& pasosMotorX,
                         int& pasosMotorY);
+
+    /**
+     * @brief Adelanta un Calculo de la cantidad de pasos necesarios para el 
+     * paso siguiente
+     * 
+     * @param deltaX 
+     * @param deltaY 
+     * @param posicionSiguienteX 
+     * @param posicionSiguienteY 
+     * @param pasosMotorX 
+     * @param pasosMotorY 
+     */
+    void calcularPasos(float x, float y,
+        float posicionSiguienteX, float posicionSiguienteY,
+        int& pasosMotorX,
+        int& pasosMotorY);
+
 
     void calcularTiemposDePaso(const float deltaX, const float deltaY,
         int64_t& tiempoPasoX,
@@ -107,7 +139,14 @@ struct PlanificadorDeMovimiento {
 
     void configurarMotores(int pasosMotorX, int pasosMotorY, int64_t tiempoPasoX, int64_t tiempoPasoY);
 
-    bool esCambioDeDireccion();
+    /**
+     * @brief Si hay cambio de dirección respecto del paso anterior, aceleramos 
+     * en la arrancada del nuevo paso
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool debeAcelerar();
 
 
     // Permite suavizar el arranque y la detención utilizando aceleración y

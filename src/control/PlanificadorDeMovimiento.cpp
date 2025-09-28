@@ -47,31 +47,38 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
 
 
     // TODO Falta implementar si es necesario ac/dcelerar solo si estamos cambiando de direccion
-    if ( esCambioDeDireccion()){
-        if (pasosRestantes > pasosParada) {
-            // --- Aceleración ---
-            velocidadCoef = sqrt(2.0f * aceleracion * pasosRecorridos) / velocidadPasosPorSegundo;
-            if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
-        } else {
-            // --- Deceleración ---
-            velocidadCoef = sqrt(2.0f * aceleracion * pasosRestantes) / velocidadPasosPorSegundo;
-            if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
-            if (velocidadCoef < 0.1f) velocidadCoef = 0.3f; // evita 0
-        }
+
+    if ((pasosRestantes > pasosParada) && debeAcelerar()) {
+
+        // --- Aceleración ---
+        velocidadCoef = sqrt(2.0f * aceleracion * pasosRecorridos) / velocidadPasosPorSegundo;
+        if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
+
+    } else if ((pasosRestantes <= pasosParada) && debeFrenar) {
+
+        // --- Deceleración ---
+        velocidadCoef = sqrt(2.0f * aceleracion * pasosRestantes) / velocidadPasosPorSegundo;
+        if (velocidadCoef > 1.0f) velocidadCoef = 1.0f;
+        if (velocidadCoef < 0.1f) velocidadCoef = 0.3f; // evita 0
+
     } else {
-        velocidadCoef = 1;
+        velocidadCoef = 1.0f;
     }
+
 
     // --- Aplica coeficiente a los intervalos ---
     int64_t tiempoPasoXacelerado = static_cast<int64_t>(tiempoPasoX / velocidadCoef);
     int64_t tiempoPasoYacelerado = static_cast<int64_t>(tiempoPasoY / velocidadCoef);
 
-    p_motorX->ponTiempoDePaso(tiempoPasoXacelerado);
-    p_motorY->ponTiempoDePaso(tiempoPasoYacelerado);
+    if (velocidadCoef > 0.0f) {
+        p_motorX->ponTiempoDePaso(tiempoPasoXacelerado);
+        p_motorY->ponTiempoDePaso(tiempoPasoYacelerado);
+    }
 }
 
-void PlanificadorDeMovimiento::moverA(float x, float y,const std::optional<std::string>& siguienteG1) {
+void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std::pair<float, float>>& siguienteG1) {
     printf("PlanificadorDeMovimiento::moverA x: %f, y: %f \n", x, y);
+
 
     if (paradaEmergencia) {
         printf("Por lo visto paradaEmergencia es true :\n");
@@ -93,6 +100,32 @@ void PlanificadorDeMovimiento::moverA(float x, float y,const std::optional<std::
     int sentidoMY_actual = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
 
 
+    debeFrenar = true; // debe frenar siempre a no ser que realmente no sea necesario
+    if (siguienteG1.has_value()) {
+
+        printf("siguienteG1: %f, %f \n", siguienteG1->first, siguienteG1->second);
+        // TODO Habría que consultar si para el proximo movimiento hay un cambio de sentido en los motores
+        // 1. calcular la posicion final del movimiento actual -> será x e y
+        // 2. ver los pasos desde la posicion algual a la siguienteG1
+        int pasosMotorSiguienteX = 0;
+        int pasosMotorSiguienteY = 0;
+        calcularPasos(x, y,
+            siguienteG1->first,
+            siguienteG1->second,
+            pasosMotorSiguienteX,
+            pasosMotorSiguienteY);
+
+        // 3. ver el sentido de los pasos
+        int sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
+        int sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
+
+        // 4. ver si hay diferencia con los que está dando para llegar al movimiento acutal
+        if (sentidoMX_actual != sentidoMX_siguiente || sentidoMY_actual != sentidoMY_siguiente) {
+            debeFrenar = true;
+        } else {
+            debeFrenar = false;
+        }
+    }
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
@@ -148,7 +181,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y,const std::optional<std::
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
 
-void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY, const std::optional<std::string>& siguienteG1) {
+void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY,
+                                             const std::optional<std::pair<float, float>>& siguienteG1) {
     moverA(x_actual + deltaX, y_actual + deltaY, siguienteG1);
 }
 
@@ -158,6 +192,15 @@ void PlanificadorDeMovimiento::calcularPasos(float x, float y,
     // Usamos la geometría H-Bot para calcular los pasos necesarios.
     float deltaX = x - x_actual;
     float deltaY = y - y_actual;
+
+    pasosMotorX = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX - deltaY)));
+    pasosMotorY = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX + deltaY)));
+}
+
+void PlanificadorDeMovimiento::calcularPasos(float x, float y, float posicionSiguienteX, float posicionSiguienteY, int& pasosMotorX, int& pasosMotorY) {
+
+    float deltaX = posicionSiguienteX - x;
+    float deltaY = posicionSiguienteY - y;
 
     pasosMotorX = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX - deltaY)));
     pasosMotorY = static_cast<int>(std::round(Fisicas::resolucionPaso * (-deltaX + deltaY)));
@@ -177,6 +220,7 @@ void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasos
     x_actual = x_ultimo + deltaX;
     y_actual = y_ultimo + deltaY;
 }
+
 
 void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
                                                      const float absPasosMotorY,
@@ -304,7 +348,7 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
 
 }
 
-bool PlanificadorDeMovimiento::esCambioDeDireccion() {
+bool PlanificadorDeMovimiento::debeAcelerar() {
     if (sentidoMX_actual != sentidoMX_ultimo || sentidoMY_actual != sentidoMY_ultimo) {
         return true;
     }

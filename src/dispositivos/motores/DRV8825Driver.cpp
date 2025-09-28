@@ -50,9 +50,8 @@ void DRV8825Driver::rotar() {
         siguienteSecuencia();
         energizarBobinaActual();
 
-        printf("En rotar %s mi paso es %d \n", nombre.c_str(), pasoActual);
-        printf("En rotar %s tiempodeInicio es %lld  y tiempo es %lld\n",
-               nombre.c_str(), tiempoDeInicio, obtenerTiempoActualMs());
+        //printf("En rotar %s mi paso es %d \n", nombre.c_str(), pasoActual);
+        //printf("En rotar %s tiempodeInicio es %lld  y tiempo es %lld\n", nombre.c_str(), tiempoDeInicio, obtenerTiempoActualMs());
     }
 }
 /**

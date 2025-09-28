@@ -56,6 +56,6 @@ void GcodeExecutor::executionLoop() {
             std::cerr << "[Executor] No se ha interpretado nada" << std::endl;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Opcional
+        //std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Opcional
     }
 }

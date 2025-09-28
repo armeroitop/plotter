@@ -70,8 +70,8 @@ int main() {
     FifoReader fifoReader("/tmp/gcode_pipe", queue);
     GcodeExecutor executor(queue, gcode);
 
-    fifoReader.start();
-    executor.start();
+    fifoReader.start(); // Aquí se abre otro hilo - readerThread
+    executor.start();   // Aquí se abre otro hilo - executorThread
 
     std::cout << "[main] Esperando comandos en /tmp/gcode_pipe (Ctrl+C para salir)\n";
 
