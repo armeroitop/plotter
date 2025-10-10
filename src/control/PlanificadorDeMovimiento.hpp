@@ -46,8 +46,7 @@ struct PlanificadorDeMovimiento {
     int sentidoMY_siguiente = 0;
 
     bool debeFrenar = true;
-
-
+    bool debeAcelerar = true;
 
 
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
@@ -146,7 +145,7 @@ struct PlanificadorDeMovimiento {
      * @return true 
      * @return false 
      */
-    bool debeAcelerar();
+    bool get_debeAcelerar();
 
 
     // Permite suavizar el arranque y la detención utilizando aceleración y

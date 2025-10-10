@@ -48,7 +48,7 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
 
     // TODO Falta implementar si es necesario ac/dcelerar solo si estamos cambiando de direccion
 
-    if ((pasosRestantes > pasosParada) && debeAcelerar()) {
+    if ((pasosRestantes > pasosParada) && debeAcelerar) {
 
         // --- Aceleración ---
         velocidadCoef = sqrt(2.0f * aceleracion * pasosRecorridos) / velocidadPasosPorSegundo;
@@ -96,8 +96,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
     calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
     // Me guardo los signos de direccion de los motores (TODO sería bueno usar p_motorX->sentidoGiro y quitar esto de aquí)
-    int sentidoMX_actual = (pasosMotorX > 0) - (pasosMotorX < 0); // -1, 0 o 1
-    int sentidoMY_actual = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
+    sentidoMX_actual = (pasosMotorX > 0) - (pasosMotorX < 0); // -1, 0 o 1
+    sentidoMY_actual = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
 
 
     debeFrenar = true; // debe frenar siempre a no ser que realmente no sea necesario
@@ -116,8 +116,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
             pasosMotorSiguienteY);
 
         // 3. ver el sentido de los pasos
-        int sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
-        int sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
+        sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
+        sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
 
         // 4. ver si hay diferencia con los que está dando para llegar al movimiento acutal
         if (sentidoMX_actual != sentidoMX_siguiente || sentidoMY_actual != sentidoMY_siguiente) {
@@ -126,6 +126,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
             debeFrenar = false;
         }
     }
+
+    debeAcelerar = get_debeAcelerar();
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
@@ -138,12 +140,6 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
 
     // Mover los motores hasta llegar a la posicion.
     arrancar();
-
-    std::cout << "[PlanificadorDeMovimiento] : sentidoMX_actual:  " << sentidoMX_actual
-        << ", sentidoMY_actual: " << sentidoMY_actual
-        << ", sentidoMx_pointer: " << static_cast<int>(p_motorX->sentidoGiro)
-        << ", sentidoMy_pointer: " << static_cast<int>(p_motorY->sentidoGiro)
-        << std::endl;
 
     bool finPorCarrera = false;
 
@@ -348,8 +344,9 @@ void PlanificadorDeMovimiento::configurarMotores(int pasosMotorX, int pasosMotor
 
 }
 
-bool PlanificadorDeMovimiento::debeAcelerar() {
+bool PlanificadorDeMovimiento::get_debeAcelerar() {
     if (sentidoMX_actual != sentidoMX_ultimo || sentidoMY_actual != sentidoMY_ultimo) {
+        //std::cout << "[PlanificadorDeMovimiento] debeAcelerar: true" << std::endl;
         return true;
     }
     return false;
