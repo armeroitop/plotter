@@ -3,7 +3,12 @@
 #include <iostream>
 
 Gcode::Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli)
-    : planificador(planificador), servoBoli(servoBoli) { }
+    : planificador(planificador), servoBoli(servoBoli) { 
+
+        // TODO: El Gcode no debería conocer a servoBoli. Este se debería de mover al planificador
+        // y que toda la lógica se haga allí
+    }
+
 
 /**
  * @brief  Interpreta una instrucción G-code y ejecuta la acción correspondiente.
@@ -17,31 +22,54 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
 
     std::cout << "[Gcode::interpretar] Recibido: " << instruccion << std::endl;
 
-    if (comando == "G1") {
-        int x = 0, y = 0;
+    if (comando == "G1" || comando == "G01" || comando == "G00") {
+        double x = 0, y = 0, z = 0, f = 0;
+        bool hasX = false, hasY = false, hasZ = false, hasF = false;
         char eje;
         while (entrada >> eje) {
+            if (entrada.peek() == '\n') break;  // seguridad
+            eje = toupper(eje);
+
             if (eje == 'X') {
                 entrada >> x;
+                hasX = true;
             } else if (eje == 'Y') {
                 entrada >> y;
+                hasY = true;
+            } else if (eje == 'Z') {
+                entrada >> z;
+                hasZ = true;
+            } else if (eje == 'F') {
+                entrada >> f;
+                hasF = true;
+            } else {
+                // ignorar cualquier otra letra
+                float tmp; entrada >> tmp;
             }
+        }
+
+        // TODO: estaría bien trasladar esto al planificador
+        if ( hasZ ){
+            if (z > 0) servoBoli.levantar();
+            else servoBoli.bajar();        
         }
 
         std::optional<std::pair<float, float>> siguienteG1;
         if (bufferMovimientos.size() > 1) {
-             // acceso por índice
-             siguienteG1 = extraerCoordenadas( bufferMovimientos[1]);
+            // acceso por índice
+            siguienteG1 = extraerCoordenadas(bufferMovimientos[1]);
         }
 
-        if (modoRelativo) {
-            printf("anificador.moverRelativo X: %i, Y: %i  \n", x, y);
-            planificador.moverRelativo(x, y, siguienteG1);
-            //planificador.moverRelativo(current.first, current.second, next);
-        } else {
-            printf("planificador.moverA X: %i, Y: %i  \n", x, y);
-            planificador.moverA(x, y, siguienteG1);
-            //planificador.moverA(current.first, current.second, next);
+        if (hasX && hasY) {               
+            if (modoRelativo) {
+                printf("panificador.moverRelativo X: %f, Y: %f  \n", x, y);
+                planificador.moverRelativo(x, y, siguienteG1);
+                //planificador.moverRelativo(current.first, current.second, next);
+            } else {
+                printf("planificador.moverA X: %f, Y: %f  \n", x, y);
+                planificador.moverA(x, y, siguienteG1);
+                //planificador.moverA(current.first, current.second, next);
+            }
         }
 
         // Eliminamos el comando ya ejecutado
@@ -88,7 +116,7 @@ std::pair<float, float> Gcode::extraerCoordenadas(const std::string& comandoG1) 
     std::istringstream entrada(comandoG1);
     std::string comando;
     entrada >> comando; // Leer "G1"
-    
+
     char eje;
     while (entrada >> eje) {
         if (eje == 'X') {
@@ -97,7 +125,7 @@ std::pair<float, float> Gcode::extraerCoordenadas(const std::string& comandoG1) 
             entrada >> coordenadas.second;
         }
     }
-    
+
     return coordenadas;
 }
 

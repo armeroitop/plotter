@@ -122,7 +122,9 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
         // 4. ver si hay diferencia con los que está dando para llegar al movimiento acutal
         if (sentidoMX_actual != sentidoMX_siguiente || sentidoMY_actual != sentidoMY_siguiente) {
             debeFrenar = true;
+            //std::cout << "[PlanificadorDeMovimiento] debeFrenar: true" << std::endl;
         } else {
+            //std::cout << "[PlanificadorDeMovimiento] debeFrenar: false" << std::endl;
             debeFrenar = false;
         }
     }
@@ -349,6 +351,7 @@ bool PlanificadorDeMovimiento::get_debeAcelerar() {
         //std::cout << "[PlanificadorDeMovimiento] debeAcelerar: true" << std::endl;
         return true;
     }
+    //std::cout << "[PlanificadorDeMovimiento] debeAcelerar: false" << std::endl;
     return false;
 }
 

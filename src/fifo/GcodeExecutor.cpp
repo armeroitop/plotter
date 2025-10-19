@@ -37,12 +37,13 @@ void GcodeExecutor::executionLoop() {
         std::string linea = queue.pop(); // Espera si la cola está vacía
         std::cout << "[Executor] Ejecutando: " << linea << std::endl;
 
-        if (linea.rfind("G1", 0) == 0) {
+        // Creamos un buffer con el movimiento actual y el siguiente 
+        if (linea.rfind("G1", 0) == 0 || linea.rfind("G01", 0) == 0 ){
             bufferMovimientos.push_back(linea);
 
             if (!queue.empty()) {
                 std::string siguiente = queue.peek();
-                if (siguiente.rfind("G1", 0) == 0) {
+                if (siguiente.rfind("G1", 0) == 0 || siguiente.rfind("G01", 0) == 0){
                     bufferMovimientos.push_back(siguiente);
                 }
             }

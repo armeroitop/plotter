@@ -1,4 +1,5 @@
 #include "ServoBoli.hpp"
+#include "fifo/FifoWriter.hpp"
 
 
 
@@ -25,15 +26,27 @@ ServoBoli::~ServoBoli() {
 }
 
 void ServoBoli::levantar() {
+    if (!esAbajo) return;
+
     moverServo(3); // 3 es el valor mínimo que acepta el servo
     esAbajo = false;
     printf("levanta\n");
+
+    FifoWriter::write("[ServoBoli] metodo: M1"); // FIXME: habría que pensar mejor esto
+   
+    delay(300);
 }
 
 void ServoBoli::bajar() {
+    if (esAbajo) return;
+
     moverServo(23); // 23 es el valor maximo que acepta el servo
     esAbajo = true;
     printf("baja\n");
+
+    FifoWriter::write("[ServoBoli] metodo: M2");// FIXME: habría que pensar mejor esto
+
+    delay(300);
 }
 
 bool ServoBoli::estaAbajo() const {
