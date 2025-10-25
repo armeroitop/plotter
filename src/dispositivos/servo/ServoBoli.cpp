@@ -28,25 +28,27 @@ ServoBoli::~ServoBoli() {
 void ServoBoli::levantar() {
     if (!esAbajo) return;
 
-    moverServo(3); // 3 es el valor mínimo que acepta el servo
+    //moverServo(3); // 3 es el valor mínimo que acepta el servo
+    moverServo(10);
     esAbajo = false;
     printf("levanta\n");
 
     FifoWriter::write("[ServoBoli] metodo: M1"); // FIXME: habría que pensar mejor esto
    
-    delay(300);
+    delay(1000);
 }
 
 void ServoBoli::bajar() {
     if (esAbajo) return;
 
-    moverServo(23); // 23 es el valor maximo que acepta el servo
+    //moverServo(23); // 23 es el valor maximo que acepta el servo
+    moverServo(20);
     esAbajo = true;
     printf("baja\n");
 
     FifoWriter::write("[ServoBoli] metodo: M2");// FIXME: habría que pensar mejor esto
 
-    delay(300);
+    delay(1000);
 }
 
 bool ServoBoli::estaAbajo() const {

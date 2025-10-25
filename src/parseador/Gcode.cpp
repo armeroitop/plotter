@@ -2,8 +2,8 @@
 #include <sstream>
 #include <iostream>
 
-Gcode::Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli)
-    : planificador(planificador), servoBoli(servoBoli) { 
+Gcode::Gcode(PlanificadorDeMovimiento& planificador)
+    : planificador(planificador) { 
 
         // TODO: El Gcode no debería conocer a servoBoli. Este se debería de mover al planificador
         // y que toda la lógica se haga allí
@@ -50,8 +50,9 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
 
         // TODO: estaría bien trasladar esto al planificador
         if ( hasZ ){
-            if (z > 0) servoBoli.levantar();
-            else servoBoli.bajar();        
+            /*if (z > 0) servoBoli.levantar();
+            else servoBoli.bajar(); */
+            planificador.moverZ(z);            
         }
 
         std::optional<std::pair<float, float>> siguienteG1;
@@ -84,23 +85,21 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
         std::cout << "[GCODE] Modo RELATIVO activado" << std::endl;
 
     } else if (comando == "M1") {
-        servoBoli.levantar();
+        //servoBoli.levantar();
         std::cout << "[GCODE] Levantando el boli" << std::endl;
 
     } else if (comando == "M2") {
-        servoBoli.bajar();
+        //servoBoli.bajar();
         std::cout << "[GCODE] Bajando el boli" << std::endl;
 
     } else if (comando == "M100") { // peticion de informacion
         planificador.enviarInformacionGeneralFifo();
 
     } else if (comando == "M999") {
-        servoBoli.liberar();
         planificador.desactivarParadaDeEmergencia();
-        printf("[GCODE] Liberar tensión en servo del boli y desactivar parada de Emergencia");
+        std::cout << "[GCODE] Liberar tensión en servo del boli y desactivar parada de Emergencia" << std::endl;
 
     } else if (comando == "M112") {
-        servoBoli.liberar();
         planificador.activarParadaDeEmergencia();
         std::cout << "[GCODE] Parada de emergencia" << std::endl;
 

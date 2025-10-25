@@ -46,7 +46,7 @@ int main() {
 
 
 
-    // === Configuración ===
+    // === Inicialización de hardware ===
     ServoBoli servoBoli(config::pin_servoBoli);
 
     DRV8825Driver motorX(config::MP1_step_pin, config::MP1_dir_pin, config::MP1_enable_pin);
@@ -54,16 +54,19 @@ int main() {
     DRV8825Driver motorY(config::MP2_step_pin, config::MP2_dir_pin, config::MP2_enable_pin);
     motorY.nombre = "motorY";
 
-    PlanificadorDeMovimiento planificador;
-    planificador.setMotores(motorX, motorY);
-
+    // === Inicialización del planificador ===
     FinalDeCarrera finXmin(config::pin_finXmin);
     FinalDeCarrera finXmax(config::pin_finXmax);
     FinalDeCarrera finYmin(config::pin_finYmin);
     FinalDeCarrera finYmax(config::pin_finYmax);
-    planificador.setFinalesDeCarrera(finXmin, finXmax, finYmin, finYmax);
 
-    Gcode gcode(planificador, servoBoli);
+    PlanificadorDeMovimiento planificador;
+    planificador.setMotores(motorX, motorY);
+    planificador.setFinalesDeCarrera(finXmin, finXmax, finYmin, finYmax);
+    planificador.setServoBoli(servoBoli);
+
+    // === Inicialización del intérprete G-code ===
+    Gcode gcode(planificador);
 
     // === Cola, FIFO, y ejecutor ===
     GcodeQueue queue;

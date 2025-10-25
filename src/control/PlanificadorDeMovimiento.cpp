@@ -1,6 +1,7 @@
 #include "PlanificadorDeMovimiento.hpp"
 #include "../dispositivos/interruptores/FinalDeCarrera.hpp"
 #include "../dispositivos/motores/DRV8825Driver.hpp"
+#include "../dispositivos/servo/ServoBoli.hpp"
 #include "fifo/FifoWriter.hpp"
 #include <cmath>
 #include "../include/cargaParametros.hpp"
@@ -26,6 +27,11 @@ void PlanificadorDeMovimiento::setMotores(MotorDriver& motorX,
     p_motorX = &motorX;
     p_motorY = &motorY;
 }
+
+void PlanificadorDeMovimiento::setServoBoli(ServoBoli& servoBoli) {
+    p_servoBoli = &servoBoli;
+}
+
 
 void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
                                                     FinalDeCarrera& finXmax,
@@ -182,6 +188,11 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
 void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY,
                                              const std::optional<std::pair<float, float>>& siguienteG1) {
     moverA(x_actual + deltaX, y_actual + deltaY, siguienteG1);
+}
+
+void PlanificadorDeMovimiento::moverZ(int z) {
+    if (z > 0) p_servoBoli->levantar();
+    else p_servoBoli->bajar();
 }
 
 void PlanificadorDeMovimiento::calcularPasos(float x, float y,
@@ -357,6 +368,7 @@ bool PlanificadorDeMovimiento::get_debeAcelerar() {
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {
     paradaEmergencia = true;
+    p_servoBoli->liberar();
 
     FifoWriter::write("[Parada] Emergencia: true");
     detener(); // Detener todos los motores inmediatamente
@@ -364,6 +376,7 @@ void PlanificadorDeMovimiento::activarParadaDeEmergencia() {
 
 void PlanificadorDeMovimiento::desactivarParadaDeEmergencia() {
     paradaEmergencia = false;
+    p_servoBoli->liberar();
 
     FifoWriter::write("[Parada] Emergencia: false");
 }

@@ -8,7 +8,7 @@
 
 
 struct Gcode {
-    Gcode(PlanificadorDeMovimiento& planificador, ServoBoli& servoBoli);
+    Gcode(PlanificadorDeMovimiento& planificador);
     void interpretar(const std::string& instruccion, std::deque<std::string>& bufferMovimientos);
     
     // Método para extraer coordenadas X e Y de un comando G1
@@ -20,7 +20,7 @@ struct Gcode {
 
     private:
     PlanificadorDeMovimiento& planificador;
-    ServoBoli& servoBoli;
+    //ServoBoli& servoBoli;
 
 
 };

@@ -11,6 +11,7 @@
 class MotorDriver;
 class FinalDeCarrera;
 class Parametros;
+class ServoBoli;
 
 struct PlanificadorDeMovimiento {
     MotorDriver* p_motorX = nullptr;
@@ -20,6 +21,8 @@ struct PlanificadorDeMovimiento {
     FinalDeCarrera* p_finXmax = nullptr;
     FinalDeCarrera* p_finYmin = nullptr;
     FinalDeCarrera* p_finYmax = nullptr;
+
+    ServoBoli* p_servoBoli = nullptr;
 
     Parametros& parametros;
 
@@ -59,6 +62,7 @@ struct PlanificadorDeMovimiento {
     explicit PlanificadorDeMovimiento();
 
     void setMotores(MotorDriver& motorX, MotorDriver& motorY);
+    void setServoBoli(ServoBoli& servoBoli);
 
     void setFinalesDeCarrera(FinalDeCarrera& finXmin, FinalDeCarrera& finXmax,
                              FinalDeCarrera& finYmin, FinalDeCarrera& finYmax);
@@ -79,6 +83,9 @@ struct PlanificadorDeMovimiento {
 
     void moverMotorX(int pasos, bool direccion); // Avanza pasos en X.
     void moverMotorY(int pasos, bool direccion); // Avanza pasos en Y.
+
+    void moverZ(int z); // Avanza pasos en Z.
+
 
     /**
      * @brief Calcula la cantidad de pasos que debe dar desde la posición
