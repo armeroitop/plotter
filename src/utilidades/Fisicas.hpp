@@ -22,7 +22,7 @@ struct Fisicas {
 
     Fisicas();
 
-    void ponTiempoDePaso(int ms);
+    void ponTiempoDePaso(int64_t ms);
 
     /**
      * @brief Establece el tiempo de inicio al tiempo actual.
@@ -37,6 +37,11 @@ struct Fisicas {
      */
     void ponTiempoDeInicio();
 
+    /**
+     * @brief Devuelve el tiempo actual en microsegundos
+     * 
+     * @return * int64_t 
+     */
     int64_t obtenerTiempoActualMs();
 
     /**

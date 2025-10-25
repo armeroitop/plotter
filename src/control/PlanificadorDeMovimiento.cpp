@@ -52,8 +52,6 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
     int pasosRecorridos = pasosTotales - pasosRestantes;
 
 
-    // TODO Falta implementar si es necesario ac/dcelerar solo si estamos cambiando de direccion
-
     if ((pasosRestantes > pasosParada) && debeAcelerar) {
 
         // --- Aceleración ---
@@ -73,8 +71,10 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
 
 
     // --- Aplica coeficiente a los intervalos ---
-    int64_t tiempoPasoXacelerado = static_cast<int64_t>(tiempoPasoX / velocidadCoef);
-    int64_t tiempoPasoYacelerado = static_cast<int64_t>(tiempoPasoY / velocidadCoef);
+    float inversaVelocidadCoef = 1.0f / velocidadCoef;
+
+    int64_t tiempoPasoXacelerado = static_cast<int64_t>(tiempoPasoX * inversaVelocidadCoef);
+    int64_t tiempoPasoYacelerado = static_cast<int64_t>(tiempoPasoY * inversaVelocidadCoef);
 
     if (velocidadCoef > 0.0f) {
         p_motorX->ponTiempoDePaso(tiempoPasoXacelerado);
@@ -101,12 +101,13 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
     int64_t tiempoPasoY = 10000;
     calcularTiemposDePaso(abs(pasosMotorX), abs(pasosMotorY), tiempoPasoX, tiempoPasoY);
 
-    // Me guardo los signos de direccion de los motores (TODO sería bueno usar p_motorX->sentidoGiro y quitar esto de aquí)
+    // Me guardo los signos de direccion de los motores 
     sentidoMX_actual = (pasosMotorX > 0) - (pasosMotorX < 0); // -1, 0 o 1
     sentidoMY_actual = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
 
 
-    debeFrenar = true; // debe frenar siempre a no ser que realmente no sea necesario
+    /*debeFrenar = true; // debe frenar siempre a no ser que realmente no sea necesario  
+
     if (siguienteG1.has_value()) {
 
         printf("siguienteG1: %f, %f \n", siguienteG1->first, siguienteG1->second);
@@ -133,9 +134,10 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
             //std::cout << "[PlanificadorDeMovimiento] debeFrenar: false" << std::endl;
             debeFrenar = false;
         }
-    }
+    }*/
 
     debeAcelerar = get_debeAcelerar();
+    debeFrenar   = get_debeFrenar(x, y, siguienteG1);
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
@@ -364,6 +366,32 @@ bool PlanificadorDeMovimiento::get_debeAcelerar() {
     }
     //std::cout << "[PlanificadorDeMovimiento] debeAcelerar: false" << std::endl;
     return false;
+}
+
+bool PlanificadorDeMovimiento::get_debeFrenar(float x, float y, const std::optional<std::pair<float, float>>& siguienteG1) {
+    if (siguienteG1.has_value()) {
+
+        int pasosMotorSiguienteX = 0;
+        int pasosMotorSiguienteY = 0;
+
+        calcularPasos(x, y,
+            siguienteG1->first,
+            siguienteG1->second,
+            pasosMotorSiguienteX,
+            pasosMotorSiguienteY);
+
+        // 3. ver el sentido de los pasos
+        sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
+        sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
+
+        // 4. ver si hay diferencia con los que está dando para llegar al movimiento acutal
+        if (sentidoMX_actual != sentidoMX_siguiente || sentidoMY_actual != sentidoMY_siguiente) {
+            return true;
+            //std::cout << "[PlanificadorDeMovimiento] debeFrenar: true" << std::endl;
+        } 
+        return false;
+    }
+    return true;
 }
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {

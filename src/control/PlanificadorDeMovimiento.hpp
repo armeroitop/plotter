@@ -34,7 +34,7 @@ struct PlanificadorDeMovimiento {
     float velocidadUnitariaMax = 0;
     float velocidadX = 0;
     float velocidadY = 0;
-    int aceleracion = 500; // pasos por segundo al cuadrado. Con (a=500) esto aceleraremos a tope en 10 pasos
+    float aceleracion = 500; // pasos por segundo al cuadrado. Con (a=500) esto aceleraremos a tope en 10 pasos
 
     float velocidadCoef = 0.0f; // empieza desde 0 (parado)
     float coefStep = 0.0f;
@@ -55,7 +55,7 @@ struct PlanificadorDeMovimiento {
     /*Recorre un paso cada 10000 microsegundos que será entonces 1/10000 = 0.0001*/
     float velocidadAngularMax = 0.0001f; // pasos/microisegundos
 
-    int  velocidadPasosPorSegundo = 100; // salen a 100 pasos/segundo
+    float  velocidadPasosPorSegundo = 100; // salen a 100 pasos/segundo
 
     bool paradaEmergencia = false;
 
@@ -153,6 +153,15 @@ struct PlanificadorDeMovimiento {
      * @return false 
      */
     bool get_debeAcelerar();
+
+    /**
+     * @brief Si el próximo paso cambia alguna direccion de rotación del motor 
+     * habrá que frenar oiga
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool get_debeFrenar( float x, float y, const std::optional<std::pair<float, float>>& siguienteG1);
 
 
     // Permite suavizar el arranque y la detención utilizando aceleración y
