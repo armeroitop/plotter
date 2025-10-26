@@ -69,7 +69,6 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
         velocidadCoef = 1.0f;
     }
 
-
     // --- Aplica coeficiente a los intervalos ---
     float inversaVelocidadCoef = 1.0f / velocidadCoef;
 
@@ -84,7 +83,6 @@ void PlanificadorDeMovimiento::acelerarTiemposDePaso(int64_t& tiempoPasoX, int64
 
 void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std::pair<float, float>>& siguienteG1) {
     printf("PlanificadorDeMovimiento::moverA x: %f, y: %f \n", x, y);
-
 
     if (paradaEmergencia) {
         printf("Por lo visto paradaEmergencia es true :\n");
@@ -105,39 +103,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
     sentidoMX_actual = (pasosMotorX > 0) - (pasosMotorX < 0); // -1, 0 o 1
     sentidoMY_actual = (pasosMotorY > 0) - (pasosMotorY < 0); // -1, 0 o 1
 
-
-    /*debeFrenar = true; // debe frenar siempre a no ser que realmente no sea necesario  
-
-    if (siguienteG1.has_value()) {
-
-        printf("siguienteG1: %f, %f \n", siguienteG1->first, siguienteG1->second);
-        // TODO Habría que consultar si para el proximo movimiento hay un cambio de sentido en los motores
-        // 1. calcular la posicion final del movimiento actual -> será x e y
-        // 2. ver los pasos desde la posicion algual a la siguienteG1
-        int pasosMotorSiguienteX = 0;
-        int pasosMotorSiguienteY = 0;
-        calcularPasos(x, y,
-            siguienteG1->first,
-            siguienteG1->second,
-            pasosMotorSiguienteX,
-            pasosMotorSiguienteY);
-
-        // 3. ver el sentido de los pasos
-        sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
-        sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
-
-        // 4. ver si hay diferencia con los que está dando para llegar al movimiento acutal
-        if (sentidoMX_actual != sentidoMX_siguiente || sentidoMY_actual != sentidoMY_siguiente) {
-            debeFrenar = true;
-            //std::cout << "[PlanificadorDeMovimiento] debeFrenar: true" << std::endl;
-        } else {
-            //std::cout << "[PlanificadorDeMovimiento] debeFrenar: false" << std::endl;
-            debeFrenar = false;
-        }
-    }*/
-
     debeAcelerar = get_debeAcelerar();
-    debeFrenar   = get_debeFrenar(x, y, siguienteG1);
+    debeFrenar = get_debeFrenar(x, y, siguienteG1);
 
     // Configurar los motores con los pasos y tiempos calculados
     configurarMotores(pasosMotorX, pasosMotorY, tiempoPasoX, tiempoPasoY);
@@ -148,7 +115,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
     // Guardamos la ultima posición en x_ultimo e y_ultimo
     guardarUltimaPosicion();
 
-    // Mover los motores hasta llegar a la posicion.
+    // Activa los motores energizando el pin enable_pin.
     arrancar();
 
     bool finPorCarrera = false;
@@ -160,7 +127,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
             break;
         }
 
-        // TODO aquí se ha de actualizar el coeficiente de aceleracion
+        // Actualiza el coeficiente de aceleracion en frenada y arranque
         acelerarTiemposDePaso(tiempoPasoX, tiempoPasoY);
 
         rotar();
@@ -169,10 +136,9 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
         detenerSiCompletado();
     }
 
-    // FIXME: Este metodo no me esta funcionando
-    //calcularPosicionActual(p_motorX->pasoActual, p_motorY->pasoActual);
     std::cout << "[PlanificadorDeMovimiento] : x_ultimo:  " << x_ultimo << ", y_ultimo: " << y_ultimo << std::endl;
 
+    // Liberamos la tensión de los motores y así no quedan zumbando
     detener();
 
     sentidoMX_ultimo = sentidoMX_actual;
@@ -180,10 +146,8 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
 
     if (finPorCarrera) {
         actualizarPosicionPorPisarFinalDeCarrera();
-    } else {
-        // ya venimos con las coordenadas actualizadas
-        //actualizarPosicion(x, y);
-    }
+    } 
+
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
 
@@ -368,30 +332,35 @@ bool PlanificadorDeMovimiento::get_debeAcelerar() {
     return false;
 }
 
-bool PlanificadorDeMovimiento::get_debeFrenar(float x, float y, const std::optional<std::pair<float, float>>& siguienteG1) {
-    if (siguienteG1.has_value()) {
-
-        int pasosMotorSiguienteX = 0;
-        int pasosMotorSiguienteY = 0;
-
-        calcularPasos(x, y,
-            siguienteG1->first,
-            siguienteG1->second,
-            pasosMotorSiguienteX,
-            pasosMotorSiguienteY);
-
-        // 3. ver el sentido de los pasos
-        sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
-        sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
-
-        // 4. ver si hay diferencia con los que está dando para llegar al movimiento acutal
-        if (sentidoMX_actual != sentidoMX_siguiente || sentidoMY_actual != sentidoMY_siguiente) {
-            return true;
-            //std::cout << "[PlanificadorDeMovimiento] debeFrenar: true" << std::endl;
-        } 
-        return false;
+bool PlanificadorDeMovimiento::get_debeFrenar(float x, float y,
+        const std::optional<std::pair<float, float>>& siguienteG1) {
+    
+    // Si no hay siguiente punto, debe frenar
+    if (!siguienteG1.has_value()) {
+        return true;
     }
-    return true;
+
+     // --- Calcular los pasos del siguiente punto ---
+    int pasosMotorSiguienteX = 0;
+    int pasosMotorSiguienteY = 0;
+
+    calcularPasos(x, y,
+        siguienteG1->first,
+        siguienteG1->second,
+        pasosMotorSiguienteX,
+        pasosMotorSiguienteY);
+
+    //  --- Determinar el sentido de los motores ---
+    sentidoMX_siguiente = (pasosMotorSiguienteX > 0) - (pasosMotorSiguienteX < 0); // -1, 0 o 1
+    sentidoMY_siguiente = (pasosMotorSiguienteY > 0) - (pasosMotorSiguienteY < 0); //  
+
+    // --- Comprobar si cambia el sentido de algún motor ---
+    bool cambiaSentidoX = (sentidoMX_actual != sentidoMX_siguiente);
+    bool cambiaSentidoY = (sentidoMY_actual != sentidoMY_siguiente);
+
+    bool debeFrenar = (cambiaSentidoX || cambiaSentidoY);
+
+    return debeFrenar;    
 }
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {

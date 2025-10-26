@@ -61,11 +61,9 @@ void DRV8825Driver::rotar() {
 void DRV8825Driver::detenerSiCompletado(){
      if (haCompletadoPasos()) {
         // cuando dé el último paso cambiará "estaRotando" a false
-        //pasoActual = 0;
         estaRotando = false;
     }
 }
-
 
 bool DRV8825Driver::haCompletadoPasos() {
     return (pasoActual >= totalPasos);

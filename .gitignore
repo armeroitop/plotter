@@ -11,3 +11,5 @@ plotter
 # Ignorar archivos estáticos de bibliotecas (.a)
 **/*.a
 
+# Ignorar archivo de configuracion modificable externamente
+src/include/parametros.json
