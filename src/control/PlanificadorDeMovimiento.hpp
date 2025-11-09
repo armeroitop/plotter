@@ -65,7 +65,7 @@ struct PlanificadorDeMovimiento {
     void setServoBoli(ServoBoli& servoBoli);
 
     void setFinalesDeCarrera(FinalDeCarrera& finXmin, FinalDeCarrera& finXmax,
-                             FinalDeCarrera& finYmin, FinalDeCarrera& finYmax);
+        FinalDeCarrera& finYmin, FinalDeCarrera& finYmax);
 
     void setVelocidadMaxima(float velocidad);
     void setAceleracionMaxima(float aceleracion);
@@ -90,26 +90,26 @@ struct PlanificadorDeMovimiento {
     /**
      * @brief Calcula la cantidad de pasos que debe dar desde la posición
      * actual a los incrementos de posición en los ejes x e y
-     * 
-     * @param deltaX 
-     * @param deltaY 
-     * @param pasosMotorX 
-     * @param pasosMotorY 
+     *
+     * @param deltaX
+     * @param deltaY
+     * @param pasosMotorX
+     * @param pasosMotorY
      */
     void calcularPasos(float deltaX, float deltaY,
-                        int& pasosMotorX,
-                        int& pasosMotorY);
+        int& pasosMotorX,
+        int& pasosMotorY);
 
     /**
-     * @brief Adelanta un Calculo de la cantidad de pasos necesarios para el 
+     * @brief Adelanta un Calculo de la cantidad de pasos necesarios para el
      * paso siguiente
-     * 
-     * @param deltaX 
-     * @param deltaY 
-     * @param posicionSiguienteX 
-     * @param posicionSiguienteY 
-     * @param pasosMotorX 
-     * @param pasosMotorY 
+     *
+     * @param deltaX
+     * @param deltaY
+     * @param posicionSiguienteX
+     * @param posicionSiguienteY
+     * @param pasosMotorX
+     * @param pasosMotorY
      */
     void calcularPasos(float x, float y,
         float posicionSiguienteX, float posicionSiguienteY,
@@ -126,18 +126,32 @@ struct PlanificadorDeMovimiento {
     void guardarUltimaPosicion();
 
     void calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY);
-
-    void rotar();    // Realiza un paso en la trayectoria.
+    
+    // Realiza un paso en la trayectoria.
+    void rotar();
+    
+    // Detiene los motores si han completado el movimiento.
     void detenerSiCompletado();
-    void detener();  // Detiene todos los motores.
-    void pausar();   // Pausa el movimiento actual.
-    void arrancar(); // Reanuda después de una pausa.
+
+    // Detiene todos los motores.
+    void detener();
+
+    // Pausa el movimiento actual.
+    void pausar();
+
+    // Reanuda después de una pausa.
+    void arrancar(); 
 
     bool movimientoEnCurso(); // Devuelve si hay un movimiento en proceso.
     bool alcanzaFinalDeCarrera();    // Devuelve si se ha alcanzado un final de carrera.
+
+    // Actualiza la posición actual al pisar un final de carrera     
     void actualizarPosicionPorPisarFinalDeCarrera();
+
     bool comprobarFin(FinalDeCarrera* sensor, const std::string& nombre);
+
     std::pair<float, float> obtenerPosicion(); // Retorna la posición actual.
+
     void actualizarPosicion(float x, float y); // Actualiza la posición actual.
 
     // Enviar la poscion x y por fifowriter
@@ -146,22 +160,22 @@ struct PlanificadorDeMovimiento {
     void configurarMotores(int pasosMotorX, int pasosMotorY, int64_t tiempoPasoX, int64_t tiempoPasoY);
 
     /**
-     * @brief Si hay cambio de dirección respecto del paso anterior, aceleramos 
+     * @brief Si hay cambio de dirección respecto del paso anterior, aceleramos
      * en la arrancada del nuevo paso
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
     bool get_debeAcelerar();
 
     /**
-     * @brief Si el próximo paso cambia alguna direccion de rotación del motor 
+     * @brief Si el próximo paso cambia alguna direccion de rotación del motor
      * habrá que frenar oiga
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
-    bool get_debeFrenar( float x, float y, const std::optional<std::pair<float, float>>& siguienteG1);
+    bool get_debeFrenar(float x, float y, const std::optional<std::pair<float, float>>& siguienteG1);
 
 
     // Permite suavizar el arranque y la detención utilizando aceleración y
