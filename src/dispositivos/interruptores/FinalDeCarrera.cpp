@@ -2,6 +2,7 @@
 
 FinalDeCarrera::FinalDeCarrera(int pin) : pin { pin } {
     pinMode(pin, INPUT);// INPUT_PULLUP o INPUT_PULLDOWN
+    pullUpDnControl(pin, PUD_DOWN); // Configura resistencia pull-down
     ultimoTiempoRebote = 0;
     retardoRebote = 50; // tiempo de retardo en milisegundos
     ultimoEstadoBoton = LOW;

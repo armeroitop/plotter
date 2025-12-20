@@ -12,7 +12,7 @@ constexpr int pin_finXmax      = 26;
 constexpr int pin_finYmin      = 29;
 
 //** Final de carrera Eje Y mayor ****************
-constexpr int pin_finYmax      = 27;
+constexpr int pin_finYmax      = 11;
 
 //** Motor X de pasos 1 - Driver DRV8825 ****************
 constexpr int MP1_step_pin      = 0;
