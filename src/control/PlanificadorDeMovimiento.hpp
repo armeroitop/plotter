@@ -86,6 +86,11 @@ struct PlanificadorDeMovimiento {
 
     void moverZ(int z); // Avanza pasos en Z.
 
+    void moverArcoG02(float x1, float y1, float I, float J,
+        const std::optional<std::pair<float, float>>& siguienteG1);
+
+    void moverArcoG03(float x1, float y1, float I, float J,
+        const std::optional<std::pair<float, float>>& siguienteG1);
 
     /**
      * @brief Calcula la cantidad de pasos que debe dar desde la posición
@@ -126,10 +131,10 @@ struct PlanificadorDeMovimiento {
     void guardarUltimaPosicion();
 
     void calcularPosicionActual(int pasosMotorX, int pasosMotorY, int sentidoMX, int sentidoMY);
-    
+
     // Realiza un paso en la trayectoria.
     void rotar();
-    
+
     // Detiene los motores si han completado el movimiento.
     void detenerSiCompletado();
 
@@ -140,7 +145,7 @@ struct PlanificadorDeMovimiento {
     void pausar();
 
     // Reanuda después de una pausa.
-    void arrancar(); 
+    void arrancar();
 
     bool movimientoEnCurso(); // Devuelve si hay un movimiento en proceso.
     bool alcanzaFinalDeCarrera();    // Devuelve si se ha alcanzado un final de carrera.

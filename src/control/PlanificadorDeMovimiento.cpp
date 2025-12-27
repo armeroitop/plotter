@@ -23,7 +23,7 @@ PlanificadorDeMovimiento::PlanificadorDeMovimiento()
 }
 
 void PlanificadorDeMovimiento::setMotores(MotorDriver& motorX,
-                                          MotorDriver& motorY) {
+    MotorDriver& motorY) {
     p_motorX = &motorX;
     p_motorY = &motorY;
 }
@@ -34,9 +34,9 @@ void PlanificadorDeMovimiento::setServoBoli(ServoBoli& servoBoli) {
 
 
 void PlanificadorDeMovimiento::setFinalesDeCarrera(FinalDeCarrera& finXmin,
-                                                    FinalDeCarrera& finXmax,
-                                                    FinalDeCarrera& finYmin,
-                                                    FinalDeCarrera& finYmax) {
+    FinalDeCarrera& finXmax,
+    FinalDeCarrera& finYmin,
+    FinalDeCarrera& finYmax) {
 
     p_finXmin = &finXmin;
     p_finXmax = &finXmax;
@@ -146,13 +146,13 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
 
     if (finPorCarrera) {
         actualizarPosicionPorPisarFinalDeCarrera();
-    } 
+    }
 
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
 }
 
 void PlanificadorDeMovimiento::moverRelativo(float deltaX, float deltaY,
-                                             const std::optional<std::pair<float, float>>& siguienteG1) {
+    const std::optional<std::pair<float, float>>& siguienteG1) {
     moverA(x_actual + deltaX, y_actual + deltaY, siguienteG1);
 }
 
@@ -161,9 +161,104 @@ void PlanificadorDeMovimiento::moverZ(int z) {
     else p_servoBoli->bajar();
 }
 
+void PlanificadorDeMovimiento::moverArcoG02(float x1, float y1, float I, float J, const std::optional<std::pair<float, float>>& siguienteG1) {
+    // Implementación del movimiento en arco G02 (sentido horario)
+    // Punto inicial (x_actual, y_actual)
+    float x0 = x_actual;
+    float y0 = y_actual;
+
+    // Centro del arco
+    float xc = x0 + I;
+    float yc = y0 + J;
+
+    // Radio del arco
+    float radio = hypot(x0 - xc, y0 - yc);
+
+    // Ángulos inicial y final
+    float anguloInicio = std::atan2(y0 - yc, x0 - xc);
+    float anguloFinal = std::atan2(y1 - yc, x1 - xc);
+
+    // Asegurarse de que el ángulo final es menor que el inicial para G02
+    if (anguloFinal >= anguloInicio) {
+        anguloFinal -= 2 * M_PI;
+    }
+
+    // Precisión constante
+    float segmento_mm = 1.0f;     // ajusta según máquina
+    float pasoAngular = segmento_mm / radio;
+
+    float prevX = x0;
+    float prevY = y0;
+
+    for (float t = anguloInicio - pasoAngular; t > anguloFinal; t -= pasoAngular) {
+        float x = xc + radio * std::cos(t);
+        float y = yc + radio * std::sin(t);
+
+        // Look-ahead: el siguiente punto del arco
+        float tNext = t - pasoAngular;
+        float nextX = xc + radio * std::cos(tNext);
+        float nextY = yc + radio * std::sin(tNext);
+
+        moverA(x, y, std::make_optional(std::make_pair(nextX, nextY)));
+
+        prevX = x;
+        prevY = y;
+    }
+
+    // Último segmento → enlaza con el siguiente G1 real
+    moverA(x1, y1, siguienteG1);
+}
+
+void PlanificadorDeMovimiento::moverArcoG03(float x1, float y1, float I, float J, const std::optional<std::pair<float, float>>& siguienteG1)
+{
+    // Implementación del movimiento en arco G03 (sentido antihorario)
+    // Punto inicial (x_actual, y_actual)
+    float x0 = x_actual;
+    float y0 = y_actual;
+
+    // Centro del arco
+    float xc = x0 + I;
+    float yc = y0 + J;
+
+    // Radio del arco
+    float radio = hypot(x0 - xc, y0 - yc);
+
+    // Ángulos inicial y final
+    float anguloInicio = std::atan2(y0 - yc, x0 - xc);
+    float anguloFinal = std::atan2(y1 - yc, x1 - xc);
+
+    if (anguloFinal <= anguloInicio) {
+        anguloFinal += 2 * M_PI;
+    }
+
+    // Precisión constante
+    float segmento_mm = 1.0f;     // ajusta según máquina
+    float pasoAngular = segmento_mm / radio;
+
+    float prevX = x0;
+    float prevY = y0;
+
+    for (float t = anguloInicio + pasoAngular; t < anguloFinal; t += pasoAngular) {
+        float x = xc + radio * std::cos(t);
+        float y = yc + radio * std::sin(t);
+
+        // Look-ahead: el siguiente punto del arco
+        float tNext = t - pasoAngular;
+        float nextX = xc + radio * std::cos(tNext);
+        float nextY = yc + radio * std::sin(tNext);
+
+        moverA(x, y, std::make_optional(std::make_pair(nextX, nextY)));
+
+        prevX = x;
+        prevY = y;
+    }
+
+    // Último segmento → enlaza con el siguiente G1 real
+    moverA(x1, y1, siguienteG1);
+}
 void PlanificadorDeMovimiento::calcularPasos(float x, float y,
-                                             int& pasosMotorX,
-                                             int& pasosMotorY) {
+    int& pasosMotorX,
+    int& pasosMotorY) {
     // Usamos la geometría H-Bot para calcular los pasos necesarios.
     float deltaX = x - x_actual;
     float deltaY = y - y_actual;
@@ -182,7 +277,7 @@ void PlanificadorDeMovimiento::calcularPasos(float x, float y, float posicionSig
 }
 
 void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasosMotorY,
-                                                      int sentidoMX, int sentidoMY) {
+    int sentidoMX, int sentidoMY) {
 
     int pasosX_con_s = pasosMotorX * sentidoMX;
     int pasosY_con_s = pasosMotorY * sentidoMY;
@@ -198,9 +293,9 @@ void PlanificadorDeMovimiento::calcularPosicionActual(int pasosMotorX, int pasos
 
 
 void PlanificadorDeMovimiento::calcularTiemposDePaso(const float absPasosMotorX,
-                                                     const float absPasosMotorY,
-                                                     int64_t& tiempoPasoX,
-                                                     int64_t& tiempoPasoY) {
+    const float absPasosMotorY,
+    int64_t& tiempoPasoX,
+    int64_t& tiempoPasoY) {
 
     if (absPasosMotorX != 0 && absPasosMotorY != 0) {
         float relacionXY = static_cast<float>(absPasosMotorX) / absPasosMotorY;
@@ -333,14 +428,14 @@ bool PlanificadorDeMovimiento::get_debeAcelerar() {
 }
 
 bool PlanificadorDeMovimiento::get_debeFrenar(float x, float y,
-        const std::optional<std::pair<float, float>>& siguienteG1) {
-    
+    const std::optional<std::pair<float, float>>& siguienteG1) {
+
     // Si no hay siguiente punto, debe frenar
     if (!siguienteG1.has_value()) {
         return true;
     }
 
-     // --- Calcular los pasos del siguiente punto ---
+    // --- Calcular los pasos del siguiente punto ---
     int pasosMotorSiguienteX = 0;
     int pasosMotorSiguienteY = 0;
 
@@ -360,7 +455,7 @@ bool PlanificadorDeMovimiento::get_debeFrenar(float x, float y,
 
     bool debeFrenar = (cambiaSentidoX || cambiaSentidoY);
 
-    return debeFrenar;    
+    return debeFrenar;
 }
 
 void PlanificadorDeMovimiento::activarParadaDeEmergencia() {

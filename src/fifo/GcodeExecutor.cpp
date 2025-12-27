@@ -38,13 +38,21 @@ void GcodeExecutor::executionLoop() {
         std::cout << "[Executor] Ejecutando: " << linea << std::endl;
 
         // Creamos un buffer con el movimiento actual y el siguiente 
-        if (linea.rfind("G1", 0) == 0 || linea.rfind("G01", 0) == 0 ){
-            bufferMovimientos.push_back(linea);
+        if (linea.rfind("G1", 0) == 0
+            || linea.rfind("G01", 0) == 0
+            || linea.rfind("G02", 0) == 0
+            || linea.rfind("G03", 0) == 0) {
+
+                bufferMovimientos.push_back(linea);
 
             if (!queue.empty()) {
                 std::string siguiente = queue.peek();
-                if (siguiente.rfind("G1", 0) == 0 || siguiente.rfind("G01", 0) == 0){
-                    bufferMovimientos.push_back(siguiente);
+                if (siguiente.rfind("G1", 0) == 0
+                    || siguiente.rfind("G01", 0) == 0
+                    || siguiente.rfind("G02", 0) == 0
+                    || siguiente.rfind("G03", 0) == 0 ) {
+
+                        bufferMovimientos.push_back(siguiente);
                 }
             }
         }
