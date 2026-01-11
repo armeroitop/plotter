@@ -86,11 +86,9 @@ struct PlanificadorDeMovimiento {
 
     void moverZ(int z); // Avanza pasos en Z.
 
-    void moverArcoG02(float x1, float y1, float I, float J,
-        const std::optional<std::pair<float, float>>& siguienteG1);
+    void moverArco(float x1, float y1, float I, float J,
+        const std::optional<std::pair<float, float>>& siguienteG1, bool sentidoHorario);
 
-    void moverArcoG03(float x1, float y1, float I, float J,
-        const std::optional<std::pair<float, float>>& siguienteG1);
 
     /**
      * @brief Calcula la cantidad de pasos que debe dar desde la posición

@@ -75,9 +75,10 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
 
         // Eliminamos el comando ya ejecutado
         bufferMovimientos.clear();
-    } else if (comando == "G02") {
+    } else if (comando == "G02" || comando == "G03") {
 
         double x1 = 0, y1 = 0, I = 0, J = 0;
+        bool sentidoHorario = (comando == "G02");
         char eje;
         while (entrada >> eje) {
             if (entrada.peek() == '\n') break;  // seguridad
@@ -103,40 +104,7 @@ void Gcode::interpretar(const std::string& instruccion, std::deque<std::string>&
             siguienteG1 = extraerCoordenadas(bufferMovimientos[1]);
         }
 
-        planificador.moverArcoG02(x1, y1, I, J, siguienteG1);
-
-        // Eliminamos el comando ya ejecutado
-        bufferMovimientos.clear();
-
-    } else if (comando == "G03") {
-
-        double x1 = 0, y1 = 0, I = 0, J = 0;
-        char eje;
-        while (entrada >> eje) {
-            if (entrada.peek() == '\n') break;  // seguridad
-            eje = toupper(eje);
-
-            if (eje == 'X') {
-                entrada >> x1;
-            } else if (eje == 'Y') {
-                entrada >> y1;
-            } else if (eje == 'I') {
-                entrada >> I;
-            } else if (eje == 'J') {
-                entrada >> J;
-            } else {
-                // ignorar cualquier otra letra
-                float tmp; entrada >> tmp;
-            }
-        }
-
-        std::optional<std::pair<float, float>> siguienteG1;
-        if (bufferMovimientos.size() > 1) {
-            // acceso por índice
-            siguienteG1 = extraerCoordenadas(bufferMovimientos[1]);
-        }
-
-        planificador.moverArcoG03(x1, y1, I, J, siguienteG1);
+        planificador.moverArco(x1, y1, I, J, siguienteG1, sentidoHorario);
 
         // Eliminamos el comando ya ejecutado
         bufferMovimientos.clear();

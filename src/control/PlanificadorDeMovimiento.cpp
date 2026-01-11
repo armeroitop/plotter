@@ -161,9 +161,9 @@ void PlanificadorDeMovimiento::moverZ(int z) {
     else p_servoBoli->bajar();
 }
 
-void PlanificadorDeMovimiento::moverArcoG02(float x1, float y1, float I, float J, const std::optional<std::pair<float, float>>& siguienteG1) {
-    // Implementación del movimiento en arco G02 (sentido horario)
-    // Punto inicial (x_actual, y_actual)
+void PlanificadorDeMovimiento::moverArco(float x1, float y1, float I, float J, const std::optional<std::pair<float, float>>& siguienteG1, bool sentidoHorario) {
+
+     // Punto inicial (x_actual, y_actual)
     float x0 = x_actual;
     float y0 = y_actual;
 
@@ -172,90 +172,57 @@ void PlanificadorDeMovimiento::moverArcoG02(float x1, float y1, float I, float J
     float yc = y0 + J;
 
     // Radio del arco
-    float radio = hypot(x0 - xc, y0 - yc);
+    float radio = std::hypot(x0 - xc, y0 - yc);
 
     // Ángulos inicial y final
     float anguloInicio = std::atan2(y0 - yc, x0 - xc);
     float anguloFinal = std::atan2(y1 - yc, x1 - xc);
 
-    // Asegurarse de que el ángulo final es menor que el inicial para G02
-    if (anguloFinal >= anguloInicio) {
-        anguloFinal -= 2 * M_PI;
-    }
-
     // Precisión constante
     float segmento_mm = 1.0f;     // ajusta según máquina
     float pasoAngular = segmento_mm / radio;
 
-    float prevX = x0;
-    float prevY = y0;
+    if (sentidoHorario){
+        // Asegurarse de que el ángulo final es menor que el inicial para G02
+        if (anguloFinal >= anguloInicio) {
+            anguloFinal -= 2 * M_PI;
+        }
 
-    for (float t = anguloInicio - pasoAngular; t > anguloFinal; t -= pasoAngular) {
-        float x = xc + radio * std::cos(t);
-        float y = yc + radio * std::sin(t);
+        for (float t = anguloInicio - pasoAngular; t > anguloFinal; t -= pasoAngular) {
+            float x = xc + radio * std::cos(t);
+            float y = yc + radio * std::sin(t);
 
-        // Look-ahead: el siguiente punto del arco
-        float tNext = t - pasoAngular;
-        float nextX = xc + radio * std::cos(tNext);
-        float nextY = yc + radio * std::sin(tNext);
+            // Look-ahead: el siguiente punto del arco
+            float tNext = t - pasoAngular;
+            float nextX = xc + radio * std::cos(tNext);
+            float nextY = yc + radio * std::sin(tNext);
 
-        moverA(x, y, std::make_optional(std::make_pair(nextX, nextY)));
+            moverA(x, y, std::make_optional(std::make_pair(nextX, nextY)));
+        }
 
-        prevX = x;
-        prevY = y;
+    } else {
+        // Asegurarse de que el ángulo final es mayor que el inicial para G03
+        if (anguloFinal <= anguloInicio) {
+            anguloFinal += 2 * M_PI;
+        }
+
+        for (float t = anguloInicio + pasoAngular; t < anguloFinal; t += pasoAngular) {
+            float x = xc + radio * std::cos(t);
+            float y = yc + radio * std::sin(t);
+
+            // Look-ahead: el siguiente punto del arco
+            float tNext = t - pasoAngular;
+            float nextX = xc + radio * std::cos(tNext);
+            float nextY = yc + radio * std::sin(tNext);
+
+            moverA(x, y, std::make_optional(std::make_pair(nextX, nextY)));
+        }
     }
 
     // Último segmento → enlaza con el siguiente G1 real
-    moverA(x1, y1, siguienteG1);
+        moverA(x1, y1, siguienteG1);
 }
 
-void PlanificadorDeMovimiento::moverArcoG03(float x1, float y1, float I, float J, const std::optional<std::pair<float, float>>& siguienteG1)
-{
-    // Implementación del movimiento en arco G03 (sentido antihorario)
-    // Punto inicial (x_actual, y_actual)
-    float x0 = x_actual;
-    float y0 = y_actual;
-
-    // Centro del arco
-    float xc = x0 + I;
-    float yc = y0 + J;
-
-    // Radio del arco
-    float radio = hypot(x0 - xc, y0 - yc);
-
-    // Ángulos inicial y final
-    float anguloInicio = std::atan2(y0 - yc, x0 - xc);
-    float anguloFinal = std::atan2(y1 - yc, x1 - xc);
-
-    if (anguloFinal <= anguloInicio) {
-        anguloFinal += 2 * M_PI;
-    }
-
-    // Precisión constante
-    float segmento_mm = 1.0f;     // ajusta según máquina
-    float pasoAngular = segmento_mm / radio;
-
-    float prevX = x0;
-    float prevY = y0;
-
-    for (float t = anguloInicio + pasoAngular; t < anguloFinal; t += pasoAngular) {
-        float x = xc + radio * std::cos(t);
-        float y = yc + radio * std::sin(t);
-
-        // Look-ahead: el siguiente punto del arco
-        float tNext = t - pasoAngular;
-        float nextX = xc + radio * std::cos(tNext);
-        float nextY = yc + radio * std::sin(tNext);
-
-        moverA(x, y, std::make_optional(std::make_pair(nextX, nextY)));
-
-        prevX = x;
-        prevY = y;
-    }
-
-    // Último segmento → enlaza con el siguiente G1 real
-    moverA(x1, y1, siguienteG1);
-}
 void PlanificadorDeMovimiento::calcularPasos(float x, float y,
     int& pasosMotorX,
     int& pasosMotorY) {
