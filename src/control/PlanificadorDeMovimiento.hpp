@@ -151,6 +151,9 @@ struct PlanificadorDeMovimiento {
     // Actualiza la posición actual al pisar un final de carrera     
     void actualizarPosicionPorPisarFinalDeCarrera();
 
+    // Retrocede un poco al activar un final de carrera
+    void retrocederUnPoco();
+
     bool comprobarFin(FinalDeCarrera* sensor, const std::string& nombre);
 
     std::pair<float, float> obtenerPosicion(); // Retorna la posición actual.

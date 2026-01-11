@@ -146,6 +146,7 @@ void PlanificadorDeMovimiento::moverA(float x, float y, const std::optional<std:
 
     if (finPorCarrera) {
         actualizarPosicionPorPisarFinalDeCarrera();
+        retrocederUnPoco();
     }
 
     enviarPosicionFifo(); // Enviar la posición actual por FIFO al cliente web
@@ -325,13 +326,9 @@ bool PlanificadorDeMovimiento::alcanzaFinalDeCarrera() {
 }
 
 void PlanificadorDeMovimiento::actualizarPosicionPorPisarFinalDeCarrera() {
-    // TODO: Si ha tocado un limite debemos actualizar el valor de dicho eje con el correspondiente al limite
 
     if (ultimoFinDeCarreraActivado == "Xmin") {
         x_actual = -parametros.getAncho() / 2;
-        std::cout << "[PlanificadorDeMovimiento] : "
-            << "Ancho es:  " << parametros.getAncho()
-            << ", x_actual: " << x_actual << std::endl;
 
     } else if (ultimoFinDeCarreraActivado == "Xmax") {
         x_actual = parametros.getAncho() / 2;
@@ -344,12 +341,28 @@ void PlanificadorDeMovimiento::actualizarPosicionPorPisarFinalDeCarrera() {
     }
 }
 
+void PlanificadorDeMovimiento::retrocederUnPoco() {
+    if (ultimoFinDeCarreraActivado == "Xmin") {
+        moverRelativo(10.0f, 0.0f, std::nullopt); 
+
+    } else if (ultimoFinDeCarreraActivado == "Xmax") {
+        moverRelativo(-10.0f, 0.0f, std::nullopt); 
+
+    } else if (ultimoFinDeCarreraActivado == "Ymin") {
+        moverRelativo(0.0f, 10.0f, std::nullopt); 
+
+    } else if (ultimoFinDeCarreraActivado == "Ymax") {
+        moverRelativo(0.0f, -10.0f, std::nullopt); 
+    }
+}
+
 bool PlanificadorDeMovimiento::comprobarFin(FinalDeCarrera* sensor, const std::string& nombre) {
     if (sensor->esPulsado()) {
         ultimoFinDeCarreraActivado = nombre;
 
         // TODO: Faltará meter el autohome y diferenciar este caso para la parada de emergencia
-        activarParadaDeEmergencia();
+
+        // activarParadaDeEmergencia();
 
         std::cout << "[PlanificadorDeMovimiento] Final de carrera: " << nombre << " activado. Parada de emergencia." << std::endl;
         FifoWriter::write("[Parada] Final de carrera: " + nombre);
